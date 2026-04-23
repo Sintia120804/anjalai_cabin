@@ -181,6 +181,36 @@
             font-size: 0.78rem;
             margin-top: 5px;
         }
+
+        .btn-google {
+            background: #fff;
+            border: 1px solid #dcdcdc;
+            border-radius: 10px;
+            color: #444;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 12px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-google:hover {
+            background: #f8f9fa;
+            border-color: #c6c6c6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -317,7 +347,12 @@
             </button>
         </form>
 
+        <div class="divider">atau daftar dengan</div>
 
+        <a href="{{ route('google.redirect') }}" class="btn-google">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+            Daftar dengan Google
+        </a>
 
         <div class="login-link">
             Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a>

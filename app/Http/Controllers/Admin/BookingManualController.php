@@ -20,7 +20,33 @@ class BookingManualController extends Controller
     public function create()
     {
         $cabins = Cabin::where('status', 'tersedia')->get();
-        return view('admin.booking_manual.create', compact('cabins'));
+
+        // Ambil semua tanggal yang sudah dipesan (Online)
+        $onlineBookings = Booking::where('status_booking', '!=', 'ditolak')
+            ->where('tanggal_checkout', '>=', now()->toDateString())
+            ->get(['cabin_id', 'tanggal_checkin', 'tanggal_checkout']);
+
+        // Ambil semua tanggal yang sudah dipesan (Manual)
+        $manualBookings = BookingManual::where('tanggal_checkout', '>=', now()->toDateString())
+            ->get(['cabin_id', 'tanggal_checkin', 'tanggal_checkout']);
+
+        $bookedDates = [];
+
+        foreach ($onlineBookings as $b) {
+            $bookedDates[$b->cabin_id][] = [
+                'from' => $b->tanggal_checkin,
+                'to' => $b->tanggal_checkout
+            ];
+        }
+
+        foreach ($manualBookings as $b) {
+            $bookedDates[$b->cabin_id][] = [
+                'from' => $b->tanggal_checkin,
+                'to' => $b->tanggal_checkout
+            ];
+        }
+
+        return view('admin.booking_manual.create', compact('cabins', 'bookedDates'));
     }
 
     public function store(Request $request)

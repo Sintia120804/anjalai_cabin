@@ -101,6 +101,9 @@
         const checkoutInput = document.getElementById('checkoutInput');
         const cabinSelect = document.getElementById('cabinSelect');
         const priceSection = document.getElementById('priceCalculationSection');
+        
+        // Data tanggal yang sudah dipesan per cabin
+        const bookedDatesByCabin = @json($bookedDates);
 
         const fpCheckin = flatpickr("#checkinInput", {
             minDate: "today",
@@ -119,7 +122,20 @@
             }
         });
 
-        cabinSelect.addEventListener('change', calculateTotal);
+        cabinSelect.addEventListener('change', function() {
+            const cabinId = this.value;
+            const disabledDates = bookedDatesByCabin[cabinId] || [];
+            
+            // Update tanggal yang dilarang pilih
+            fpCheckin.set('disable', disabledDates);
+            fpCheckout.set('disable', disabledDates);
+            
+            // Reset input tanggal jika ganti cabin agar tidak bentrok
+            checkinInput.value = '';
+            checkoutInput.value = '';
+            fpCheckout.set('minDate', 'today');
+            calculateTotal();
+        });
 
         function calculateTotal() {
             const inDate = checkinInput.value;

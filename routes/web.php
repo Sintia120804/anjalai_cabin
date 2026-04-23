@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Auth;
 
 // Route Auth
 Auth::routes();
+// Google Auth
+Route::get('/auth/google/redirect', [\App\Http\Controllers\SocialiteController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [\App\Http\Controllers\SocialiteController::class, 'callback'])->name('google.callback');
 
 
 // Landing Page & Detail
