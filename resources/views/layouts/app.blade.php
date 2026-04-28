@@ -85,6 +85,7 @@
         footer {
             background-color: #0f172a;
             color: #94a3b8;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-link {
@@ -143,9 +144,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/#wahana') }}">Wahana</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url('/#tentang') }}">Tentang Kami</a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/#galeri') }}">Galeri</a>
                         </li>
@@ -211,7 +210,7 @@
             @yield('content')
         </main>
 
-        <footer class="py-5 mt-5">
+        <footer class="py-5">
             <div class="container py-4">
                 <div class="row g-4 justify-content-between">
                     <div class="col-lg-4">
@@ -230,7 +229,6 @@
                         <ul class="list-unstyled">
                             <li class="mb-2"><a href="{{ url('/') }}" class="footer-link">Beranda</a></li>
                             <li class="mb-2"><a href="#cabins" class="footer-link">Semua Cabin</a></li>
-                            <li class="mb-2"><a href="#" class="footer-link">Tentang Kami</a></li>
                         </ul>
                     </div>
                     <div class="col-6 col-md-3 col-lg-3">

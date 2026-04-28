@@ -50,116 +50,12 @@
     <!-- Wave Shape Divider -->
     <div class="position-absolute bottom-0 w-100 overflow-hidden" style="line-height: 0;">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="width: calc(100% + 1.3px); height: 80px;">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,119.93,197.36,97.77,256.47,78.29,310.87,60.84,321.39,56.44Z" fill="#f1f5f9"></path>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,119.93,197.36,97.77,256.47,78.29,310.87,60.84,321.39,56.44Z" fill="#f8fafc"></path>
         </svg>
     </div>
 </div>
 
-<!-- Tentang Kami Section -->
-<div class="py-5" id="tentang" style="background-color: #f1f5f9;">
-    <div class="container py-5">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <div class="position-relative">
-                    <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070" class="img-fluid rounded-4 shadow-lg" alt="About Anjalai">
-                    <div class="position-absolute -bottom-10 -end-10 bg-white p-4 rounded-4 shadow-lg d-none d-md-block" style="bottom: -30px; right: -30px; width: 250px;">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-geo-alt-fill text-primary fs-3 me-2"></i>
-                            <h6 class="fw-bold mb-0">Lokasi Strategis</h6>
-                        </div>
-                        <p class="small text-muted mb-0">Hanya 2 jam dari hiruk pikuk kota, temukan surga tersembunyi Anda.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <h6 class="text-primary fw-bold text-uppercase tracking-wider">Tentang Kami</h6>
-                <h2 class="display-5 fw-bold mb-4">Kembali ke Akar, <br>Menemukan Ketenangan.</h2>
-                <div class="mb-4">
-                    @forelse($tentangs as $t)
-                        <div class="mb-4">
-                            <h5 class="fw-bold d-flex align-items-center">
-                                <i class="bi bi-check-circle-fill text-primary me-2"></i> {{ $t->judul }}
-                            </h5>
-                            <p class="text-muted">{{ $t->deskripsi }}</p>
-                        </div>
-                    @empty
-                        <p class="text-muted">Anjalai Cabin didirikan dengan misi menyediakan tempat peristirahatan yang menghormati kemurnian alam tanpa mengorbankan kenyamanan mewah bintang lima.</p>
-                        <p class="text-muted">Setiap unit kabin dirancang secara arsitektural untuk memberikan sirkulasi udara alami dan pencahayaan maksimal dari sinar matahari pagi.</p>
-                    @endforelse
-                </div>
-                <a href="#cabins" class="btn btn-primary rounded-pill px-4 py-2">Lihat Kamar</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Wahana Section -->
-<div class="py-5 bg-white" id="wahana">
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Aktivitas & Wahana</h6>
-            <h2 class="display-5 fw-bold">Keseruan Tanpa Henti</h2>
-            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
-        </div>
-
-        <div class="row g-4">
-            @forelse($wahanas as $w)
-            <div class="col-md-4">
-                <div class="card h-100 border-0 bg-light rounded-4 overflow-hidden shadow-hover" style="transition: 0.3s;">
-                    <div style="height: 200px; overflow: hidden;">
-                        @if($w->foto)
-                            <img src="{{ asset('storage/' .$w->foto) }}" class="w-100 h-100 object-fit-cover" alt="{{ $w->nama }}">
-                        @else
-                            <div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
-                                <i class="bi bi-stars fs-1"></i>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-2">{{ $w->nama }}</h5>
-                        <p class="text-muted small mb-0">{{ $w->deskripsi }}</p>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <div class="col-md-4">
-                <div class="text-center p-4">
-                    <i class="bi bi-bicycle fs-1 text-primary opacity-25"></i>
-                    <h6 class="mt-3">Tracking Sepeda</h6>
-                </div>
-            </div>
-            @endforelse
-        </div>
-    </div>
-</div>
-
-<!-- Gallery Section -->
-<div class="py-5" id="galeri" style="background-color: #0f172a; color: white;">
-    <div class="container py-5 text-center">
-        <div class="mb-5">
-            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Galeri Resort</h6>
-            <h2 class="display-5 fw-bold text-white">Sudut Estetik Kami</h2>
-            <p class="opacity-75">Intip setiap sudut keindahan yang siap menyambut kedatangan Anda.</p>
-        </div>
-
-        <div class="row g-3">
-            @forelse($galeriUmum as $g)
-            <div class="col-6 col-md-3">
-                <div class="position-relative overflow-hidden rounded-3" style="height: 200px; cursor: pointer;">
-                    <img src="{{ asset('storage/' .$g->foto) }}" class="w-100 h-100 object-fit-cover transition-transform" alt="Galeri">
-                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center opacity-0 hover-opacity-100 bg-dark bg-opacity-50 transition-all">
-                        <span class="small">{{ $g->caption }}</span>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <div class="col-12 opacity-50 fst-italic py-5">Belum ada foto galeri umum.</div>
-            @endforelse
-        </div>
-    </div>
-</div>
-
-<!-- Cabin List Section -->
+<!-- ① Cabin List Section (paling atas setelah hero) -->
 <div class="py-5" id="cabins" style="background-color: #f8fafc;">
     <div class="container py-5">
         <div class="text-center mb-5">
@@ -171,7 +67,7 @@
                 <div class="d-inline-flex align-items-center bg-primary bg-opacity-10 text-primary px-4 py-2 rounded-pill border border-primary border-opacity-25 shadow-sm">
                     <i class="bi bi-calendar-check-fill me-2"></i>
                     <span>Tersedia untuk: <strong>{{ \Carbon\Carbon::parse(request('checkin'))->format('d M Y') }}</strong> s/d <strong>{{ \Carbon\Carbon::parse(request('checkout'))->format('d M Y') }}</strong></span>
-                    <a href="{{ route('welcome') }}#cabins" class="ms-3 text-primary text-decoration-none fw-bold hover-scale">
+                    <a href="{{ route('welcome') }}#cabins" class="ms-3 text-primary text-decoration-none fw-bold">
                         <i class="bi bi-x-circle-fill"></i> Reset
                     </a>
                 </div>
@@ -195,7 +91,6 @@
                                     Maks. {{ $cabin->kapasitas }} Orang
                                 </span>
                             </div>
-                            <!-- Image overlay dark gradient -->
                             <div class="position-absolute bottom-0 w-100 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
                                 <h4 class="text-white fw-bold mb-0">{{ $cabin->name_cabin }}</h4>
                             </div>
@@ -218,13 +113,78 @@
                 </div>
             @empty
                 <div class="col-12 text-center py-5">
-                    <div class="p-5 bg-white rounded-4 shadow-sm border border-light animate__animated animate__fadeIn">
+                    <div class="p-5 bg-white rounded-4 shadow-sm border border-light">
                         <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
                         <h4 class="text-dark fw-bold">Tidak ada Cabin tersedia</h4>
                         <p class="text-muted">Maaf, tidak ada unit yang tersedia untuk tanggal yang Anda pilih. Silakan coba tanggal lain.</p>
                         <a href="{{ route('welcome') }}#cabins" class="btn btn-primary rounded-pill px-4 mt-2 shadow-sm">Lihat Semua Cabin</a>
                     </div>
                 </div>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+<!-- ② Wahana Section -->
+<div class="py-5 bg-white" id="wahana">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Aktivitas & Wahana</h6>
+            <h2 class="display-5 fw-bold">Keseruan Tanpa Henti</h2>
+            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
+        </div>
+
+        <div class="row g-4">
+            @forelse($wahanas as $w)
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light rounded-4 overflow-hidden" style="transition: 0.3s;">
+                    <div style="height: 200px; overflow: hidden;">
+                        @if($w->foto)
+                            <img src="{{ asset('storage/' .$w->foto) }}" class="w-100 h-100 object-fit-cover" alt="{{ $w->nama }}">
+                        @else
+                            <div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
+                                <i class="bi bi-stars fs-1"></i>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-2">{{ $w->nama }}</h5>
+                        <p class="text-muted small mb-0">{{ $w->deskripsi }}</p>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-12 text-center py-4 text-muted opacity-50">
+                <i class="bi bi-bicycle fs-1 d-block mb-3"></i>
+                Belum ada wahana tersedia.
+            </div>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+
+<!-- ④ Gallery Section (paling bawah) -->
+<div class="py-5" id="galeri" style="background-color: #0f172a; color: white;">
+    <div class="container py-5 text-center">
+        <div class="mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Galeri Resort</h6>
+            <h2 class="display-5 fw-bold text-white">Sudut Estetik Kami</h2>
+            <p class="opacity-75">Intip setiap sudut keindahan yang siap menyambut kedatangan Anda.</p>
+        </div>
+
+        <div class="row g-3">
+            @forelse($galeriUmum as $g)
+            <div class="col-6 col-md-3">
+                <div class="position-relative overflow-hidden rounded-3 galeri-item" style="height: 200px; cursor: pointer;">
+                    <img src="{{ asset('storage/' .$g->foto) }}" class="w-100 h-100 object-fit-cover" alt="Galeri" style="transition: transform 0.4s;">
+                    <div class="galeri-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50" style="opacity:0; transition: opacity 0.3s;">
+                        <span class="small text-white px-3">{{ $g->caption }}</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-12 opacity-50 fst-italic py-5">Belum ada foto galeri umum.</div>
             @endforelse
         </div>
     </div>
@@ -258,6 +218,14 @@
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;  
         overflow: hidden;
+    }
+
+    /* Galeri hover */
+    .galeri-item:hover img {
+        transform: scale(1.08);
+    }
+    .galeri-item:hover .galeri-overlay {
+        opacity: 1 !important;
     }
 </style>
 @endpush

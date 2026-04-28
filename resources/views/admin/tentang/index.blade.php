@@ -5,7 +5,7 @@
 @section('content')
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold">Konten Tentang Resort</h5>
+        <h5 class="mb-0 fw-bold">Kelola Tentang Kami</h5>
         <a href="{{ route('admin.tentang.create') }}" class="btn btn-primary rounded-pill px-4">
             <i class="bi bi-plus-lg"></i> Tambah Informasi
         </a>
@@ -52,7 +52,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">Belum ada informasi tentang resort.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">Belum ada konten Tentang Kami.</td>
                     </tr>
                     @endforelse
                 </tbody>

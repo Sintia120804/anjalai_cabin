@@ -1,13 +1,13 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Edit Tentang')
+@section('title', 'Edit Tentang Kami')
 
 @section('content')
 <div class="mb-4">
     <a href="{{ route('admin.tentang.index') }}" class="text-decoration-none text-muted">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
-    <h5 class="fw-bold mt-2">Edit Informasi Tentang Resort</h5>
+    <h5 class="fw-bold mt-2">Edit Konten Tentang Kami</h5>
 </div>
 
 <div class="row">
