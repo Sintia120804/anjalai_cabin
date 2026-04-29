@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tentangs', function (Blueprint $table) {
-            $table->id();
-            $table->string('judul');
-            $table->text('deskripsi');
-            $table->string('foto')->nullable();
-            $table->timestamps();
+        Schema::table('wahanas', function (Blueprint $table) {
+            $table->bigInteger('harga')->default(0)->after('deskripsi');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tentangs');
+        Schema::table('wahanas', function (Blueprint $table) {
+            $table->dropColumn('harga');
+        });
     }
 };

@@ -116,6 +116,43 @@
             background: #94a3b8;
         }
 
+        /* Floating WhatsApp Button */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            color: #FFF;
+            box-shadow: 2px 5px 20px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 25px;
+            }
+        }
+
         @yield('custom_css')
     </style>
     @stack('styles')
@@ -283,6 +320,10 @@
             });
         </script>
     @endif
+    <a href="https://wa.me/6281266880007?text=Halo%20Admin%20Anjalai,%20saya%20ingin%20bertanya%20tentang%20reservasi%20cabin..." 
+       class="whatsapp-float" target="_blank" title="Chat via WhatsApp">
+        <i class="bi bi-whatsapp"></i>
+    </a>
     @stack('scripts')
 </body>
 

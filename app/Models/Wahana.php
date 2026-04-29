@@ -9,5 +9,5 @@ class Wahana extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama', 'deskripsi', 'foto'];
+    protected $fillable = ['nama', 'deskripsi', 'harga', 'foto'];
 }

@@ -18,6 +18,7 @@
                         <th width="50">No</th>
                         <th>Foto</th>
                         <th>Nama Wahana</th>
+                        <th>Harga</th>
                         <th>Deskripsi</th>
                         <th width="150">Aksi</th>
                     </tr>
@@ -34,6 +35,7 @@
                             @endif
                         </td>
                         <td><div class="fw-bold">{{ $wahana->nama }}</div></td>
+                        <td><div class="text-primary fw-bold">Rp {{ number_format($wahana->harga, 0, ',', '.') }}</div></td>
                         <td><small class="text-muted line-clamp-2" style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">{{ $wahana->deskripsi }}</small></td>
                         <td>
                             <div class="d-flex gap-2">
@@ -52,7 +54,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">Belum ada data wahana.</td>
+                        <td colspan="6" class="text-center py-5 text-muted">Belum ada data wahana.</td>
                     </tr>
                     @endforelse
                 </tbody>

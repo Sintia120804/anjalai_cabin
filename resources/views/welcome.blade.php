@@ -55,6 +55,47 @@
     </div>
 </div>
 
+<!-- Why Choose Us Section -->
+<div class="py-5" style="background-color: #fff;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Keunggulan Kami</h6>
+            <h2 class="display-5 fw-bold">Kenapa Memilih Anjalai Cabin?</h2>
+            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-wind fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Ketenangan Hakiki</h4>
+                    <p class="text-muted">Jauh dari kebisingan kota, memberikan ketenangan mental yang maksimal di tengah alam.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-shield-check fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Kenyamanan Modern</h4>
+                    <p class="text-muted">Meskipun berada di tengah alam, fasilitas kabin tetap modern, bersih, dan mewah.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-tags fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Harga Terjangkau</h4>
+                    <p class="text-muted">Nikmati pengalaman menginap premium dengan harga yang sangat bersaing dan transparan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- ① Cabin List Section (paling atas setelah hero) -->
 <div class="py-5" id="cabins" style="background-color: #f8fafc;">
     <div class="container py-5">
@@ -147,8 +188,9 @@
                             </div>
                         @endif
                     </div>
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-2">{{ $w->nama }}</h5>
+                    <div class="card-body p-4 text-center">
+                        <h5 class="fw-bold mb-1">{{ $w->nama }}</h5>
+                        <div class="text-primary fw-bold mb-3">Rp {{ number_format($w->harga, 0, ',', '.') }}</div>
                         <p class="text-muted small mb-0">{{ $w->deskripsi }}</p>
                     </div>
                 </div>
@@ -164,7 +206,97 @@
 </div>
 
 
+
+
+<!-- ① Fasilitas Unggulan Section -->
+<div class="py-5" style="background-color: #fff;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Kenyamanan Tamu</h6>
+            <h2 class="display-5 fw-bold">Fasilitas Unggulan</h2>
+            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4 col-lg-3">
+                <div class="p-3 bg-light rounded-4 border d-flex align-items-center gap-3 shadow-hover">
+                    <div class="bg-white p-2 rounded shadow-sm">
+                        <i class="bi bi-cup-hot text-primary fs-3"></i>
+                    </div>
+                    <span class="fw-bold">Sarapan Pagi</span>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="p-3 bg-light rounded-4 border d-flex align-items-center gap-3 shadow-hover">
+                    <div class="bg-white p-2 rounded shadow-sm">
+                        <i class="bi bi-thermometer-half text-primary fs-3"></i>
+                    </div>
+                    <span class="fw-bold">Water Heater</span>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="p-3 bg-light rounded-4 border d-flex align-items-center gap-3 shadow-hover">
+                    <div class="bg-white p-2 rounded shadow-sm">
+                        <i class="bi bi-fire text-primary fs-3"></i>
+                    </div>
+                    <span class="fw-bold">BBQ & Api Unggun</span>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="p-3 bg-light rounded-4 border d-flex align-items-center gap-3 shadow-hover">
+                    <div class="bg-white p-2 rounded shadow-sm">
+                        <i class="bi bi-droplet text-primary fs-3"></i>
+                    </div>
+                    <span class="fw-bold">Water Dispenser</span>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="p-3 bg-light rounded-4 border d-flex align-items-center gap-3 shadow-hover">
+                    <div class="bg-white p-2 rounded shadow-sm">
+                        <i class="bi bi-bag-check text-primary fs-3"></i>
+                    </div>
+                    <span class="fw-bold">Alat Mandi</span>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="p-3 bg-light rounded-4 border d-flex align-items-center gap-3 shadow-hover">
+                    <div class="bg-white p-2 rounded shadow-sm">
+                        <i class="bi bi-camera-video text-primary fs-3"></i>
+                    </div>
+                    <span class="fw-bold">Dokumentasi</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⑤ Map Location Section -->
+
+<div class="py-5" style="background-color: #f8fafc;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Lokasi Kami</h6>
+            <h2 class="display-5 fw-bold">Temukan Jalan Menuju Ketenangan</h2>
+            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
+        </div>
+        <div class="rounded-4 overflow-hidden shadow-lg border border-white border-4" style="height: 450px;">
+            <iframe 
+                src="https://maps.google.com/maps?q=Anjalai%20Nature%20Cabin%20Solok&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+        <div class="text-center mt-4">
+            <p class="text-muted"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Taluak anjalai, Kec. Lembah Gumanti, Kabupaten Solok, Sumatera Barat 27371</p>
+        </div>
+    </div>
+</div>
+
 <!-- ④ Gallery Section (paling bawah) -->
+
 <div class="py-5" id="galeri" style="background-color: #0f172a; color: white;">
     <div class="container py-5 text-center">
         <div class="mb-5">
@@ -176,10 +308,15 @@
         <div class="row g-3">
             @forelse($galeriUmum as $g)
             <div class="col-6 col-md-3">
-                <div class="position-relative overflow-hidden rounded-3 galeri-item" style="height: 200px; cursor: pointer;">
+                <div class="position-relative overflow-hidden rounded-3 galeri-item" 
+                     style="height: 200px; cursor: pointer;"
+                     onclick="showGalleryDetail('{{ asset('storage/' .$g->foto) }}', '{{ $g->caption }}')">
                     <img src="{{ asset('storage/' .$g->foto) }}" class="w-100 h-100 object-fit-cover" alt="Galeri" style="transition: transform 0.4s;">
                     <div class="galeri-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50" style="opacity:0; transition: opacity 0.3s;">
-                        <span class="small text-white px-3">{{ $g->caption }}</span>
+                        <div class="text-center">
+                            <i class="bi bi-zoom-in text-white fs-2 mb-2"></i>
+                            <span class="small text-white d-block px-3">{{ $g->caption }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,6 +326,32 @@
         </div>
     </div>
 </div>
+
+<!-- Gallery Detail Modal -->
+<div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0 position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 z-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded-3 shadow-lg" style="max-height: 85vh;">
+                    <div class="bg-dark bg-opacity-75 text-white p-3 mt-2 rounded-3">
+                        <p id="modalCaption" class="mb-0"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showGalleryDetail(imgSrc, caption) {
+        document.getElementById('modalImage').src = imgSrc;
+        document.getElementById('modalCaption').innerText = caption;
+        var myModal = new bootstrap.Modal(document.getElementById('galleryModal'));
+        myModal.show();
+    }
+</script>
 
 @endsection
 
@@ -226,6 +389,15 @@
     }
     .galeri-item:hover .galeri-overlay {
         opacity: 1 !important;
+    }
+    .amenity-card {
+        transition: all 0.3s ease;
+        background-color: #fff;
+    }
+    .amenity-card:hover {
+        transform: translateY(-5px);
+        border-color: #2563eb !important;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1) !important;
     }
 </style>
 @endpush

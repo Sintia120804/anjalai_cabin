@@ -21,6 +21,13 @@
                         <input type="text" name="nama" class="form-control" placeholder="Contoh: Kolam Renang Infinity" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-bold">Harga <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="harga" class="form-control" placeholder="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold">Deskripsi</label>
                         <textarea name="deskripsi" class="form-control" rows="4" placeholder="Jelaskan keseruan wahana ini..."></textarea>
                     </div>

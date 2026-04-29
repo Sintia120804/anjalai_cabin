@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\WahanaController;
-use App\Http\Controllers\Admin\TentangController;
 use App\Http\Controllers\Admin\GaleriUmumController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\BookingManualController;
@@ -47,9 +46,6 @@ Route::prefix('admin')
 
           Route::resource('/wahana', WahanaController::class)
                ->names('admin.wahana');
-
-          Route::resource('/tentang', TentangController::class)
-               ->names('admin.tentang');
 
           Route::resource('/galeri-umum', GaleriUmumController::class)
                ->names('admin.galeri_umum');

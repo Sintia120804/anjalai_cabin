@@ -8,6 +8,8 @@ use App\Models\Pembayaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingNotification;
 
 class UserBookingController extends Controller
 {
@@ -111,6 +113,14 @@ class UserBookingController extends Controller
             'bukti_pembayaran' => null,
             'status_pembayaran' => 'pending'
         ]);
+
+        // Kirim Email Notifikasi
+        try {
+            Mail::to(Auth::user()->email)->send(new BookingNotification($booking));
+        } catch (\Exception $e) {
+            // Log error if mail fails, but don't stop the process
+            \Illuminate\Support\Facades\Log::error('Mail Error: ' . $e->getMessage());
+        }
 
         return redirect()->route('user.dashboard')->with('success', 'Reservasi berhasil dibuat! Silakan lakukan pembayaran agar pesanan tidak dibatalkan.');
     }

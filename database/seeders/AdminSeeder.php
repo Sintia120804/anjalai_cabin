@@ -7,12 +7,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Cabin;
 use App\Models\Wahana;
-use App\Models\Tentang;
 use App\Models\GaleriUmum;
 use App\Models\Booking;
 use App\Models\BookingManual;
 use App\Models\Pembayaran;
-use App\Models\Testimoni;
 use Carbon\Carbon;
 
 class AdminSeeder extends Seeder
