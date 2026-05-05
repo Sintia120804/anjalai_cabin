@@ -179,6 +179,9 @@
                                 href="{{ url('/') }}">Beranda</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ url('/#cabins') }}">Cabin</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{{ url('/#wahana') }}">Wahana</a>
                         </li>
 
@@ -189,6 +192,16 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item me-3">
+                            <a class="nav-link position-relative" href="{{ route('cart.index') }}">
+                                <i class="bi bi-cart3 fs-5"></i>
+                                @if(session('cart') && count(session('cart')) > 0)
+                                    <span class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                        {{ count(session('cart')) }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">

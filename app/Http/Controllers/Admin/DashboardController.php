@@ -18,7 +18,6 @@ class DashboardController extends Controller
         $totalCabin         = Cabin::count();
         $totalUser          = User::where('role', 'pengunjung')->count();
         $totalPendapatan    = Pembayaran::where('status_pembayaran', 'diterima')->sum('jumlah_bayar') + BookingManual::sum('total_harga');
-
         // Get latest bookings
         $latestBookings = Booking::with(['user', 'cabin'])->latest()->take(5)->get();
         $latestManuals = BookingManual::with(['cabin'])->latest()->take(5)->get();

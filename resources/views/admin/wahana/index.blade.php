@@ -18,6 +18,7 @@
                         <th width="50">No</th>
                         <th>Foto</th>
                         <th>Nama Wahana</th>
+                        <th>Durasi</th>
                         <th>Harga</th>
                         <th>Deskripsi</th>
                         <th width="150">Aksi</th>
@@ -35,6 +36,7 @@
                             @endif
                         </td>
                         <td><div class="fw-bold">{{ $wahana->nama }}</div></td>
+                        <td><span class="badge bg-light text-dark border">{{ $wahana->durasi ?? '-' }}</span></td>
                         <td><div class="text-primary fw-bold">Rp {{ number_format($wahana->harga, 0, ',', '.') }}</div></td>
                         <td><small class="text-muted line-clamp-2" style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">{{ $wahana->deskripsi }}</small></td>
                         <td>

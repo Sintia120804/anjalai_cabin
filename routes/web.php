@@ -22,6 +22,7 @@ Route::get('/auth/google/callback', [\App\Http\Controllers\SocialiteController::
 // Landing Page & Detail
 Route::get('/', [PublicCabinController::class, 'index'])->name('welcome');
 Route::get('/cabin/{cabin}', [PublicCabinController::class, 'show'])->name('cabin.show');
+Route::get('/cabin/{cabin}/available-units', [PublicCabinController::class, 'availableUnits'])->name('cabin.available_units');
 
 // Admin Routes
 Route::prefix('admin')
@@ -34,6 +35,11 @@ Route::prefix('admin')
           Route::resource('/cabin', CabinController::class)
                ->names('admin.cabin');
 
+          Route::get('/cabin/{cabin}/units', [\App\Http\Controllers\Admin\CabinUnitController::class, 'index'])->name('admin.cabin.units.index');
+          Route::post('/cabin/{cabin}/units', [\App\Http\Controllers\Admin\CabinUnitController::class, 'store'])->name('admin.cabin.units.store');
+          Route::delete('/cabin-units/{unit}', [\App\Http\Controllers\Admin\CabinUnitController::class, 'destroy'])->name('admin.cabin.units.destroy');
+
+
           Route::resource('/booking', BookingController::class)
                ->names('admin.booking');
           Route::patch('/booking/{booking}/status', [BookingController::class, 'updateStatus'])->name('admin.booking.updateStatus');
@@ -41,8 +47,7 @@ Route::prefix('admin')
           Route::resource('/booking-manual', BookingManualController::class)
                ->names('admin.booking_manual');
 
-          Route::resource('/fasilitas-tambahan', \App\Http\Controllers\Admin\FasilitasTambahanController::class)
-               ->names('admin.fasilitas_tambahan');
+
 
           Route::resource('/wahana', WahanaController::class)
                ->names('admin.wahana');
@@ -55,7 +60,14 @@ Route::prefix('admin')
 // User/Pengunjung Routes
 Route::middleware(['auth'])->group(function () {
      Route::get('/dashboard', [UserBookingController::class, 'index'])->name('user.dashboard');
-     Route::post('/cabin/{cabin}/book', [UserBookingController::class, 'store'])->name('user.booking.store');
+     
+     // Cart Routes
+     Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+     Route::post('/cart/add/{cabin}', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+     Route::delete('/cart/remove/{id}', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+     Route::patch('/cart/update/{id}', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+     Route::post('/cart/checkout', [\App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout');
+
      Route::delete('/booking/{booking}', [UserBookingController::class, 'destroy'])->name('user.booking.destroy');
 
      // Manual Payment Upload

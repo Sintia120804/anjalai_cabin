@@ -35,14 +35,7 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium">Harga per Malam (Rp) <span class="text-danger">*</span></label>
-                            <input type="number" name="harga_per_malam" class="form-control @error('harga_per_malam') is-invalid @enderror" value="{{ old('harga_per_malam') }}" required placeholder="Contoh: 500000">
-                            @error('harga_per_malam')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="form-label fw-medium">Kapasitas (Orang) <span class="text-danger">*</span></label>
                             <input type="number" name="kapasitas" class="form-control @error('kapasitas') is-invalid @enderror" value="{{ old('kapasitas') }}" required placeholder="Contoh: 4">
                             @error('kapasitas')
@@ -51,7 +44,31 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Harga Weekday (Minggu-Kamis) <span class="text-danger">*</span></label>
+                            <input type="number" name="harga_weekday" class="form-control @error('harga_weekday') is-invalid @enderror" value="{{ old('harga_weekday') }}" required placeholder="Contoh: 1275000">
+                            @error('harga_weekday')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Harga Weekend (Jumat-Sabtu) <span class="text-danger">*</span></label>
+                            <input type="number" name="harga_weekend" class="form-control @error('harga_weekend') is-invalid @enderror" value="{{ old('harga_weekend') }}" required placeholder="Contoh: 1500000">
+                            @error('harga_weekend')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Harga Couple / 2 Pax <span class="text-muted small">(Opsional)</span></label>
+                            <input type="number" name="harga_couple" class="form-control @error('harga_couple') is-invalid @enderror" value="{{ old('harga_couple') }}" placeholder="Contoh: 975000">
+                            @error('harga_couple')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label fw-medium">Status <span class="text-danger">*</span></label>
                         <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                             <option value="tersedia" {{ old('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
@@ -61,6 +78,42 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Fasilitas Cabin</label>
+                        <div id="facilities-container">
+                            <div class="input-group mb-2 facility-item">
+                                <input type="text" name="fasilitas[]" class="form-control" placeholder="Contoh: Sarapan">
+                                <button type="button" class="btn btn-outline-danger remove-facility">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-1" id="add-facility">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah Fasilitas
+                        </button>
+                    </div>
+
+                    <script>
+                        document.getElementById('add-facility').addEventListener('click', function() {
+                            const container = document.getElementById('facilities-container');
+                            const newItem = document.createElement('div');
+                            newItem.className = 'input-group mb-2 facility-item';
+                            newItem.innerHTML = `
+                                <input type="text" name="fasilitas[]" class="form-control" placeholder="Contoh: Sarapan">
+                                <button type="button" class="btn btn-outline-danger remove-facility">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            `;
+                            container.appendChild(newItem);
+                        });
+
+                        document.addEventListener('click', function(e) {
+                            if (e.target.closest('.remove-facility')) {
+                                e.target.closest('.facility-item').remove();
+                            }
+                        });
+                    </script>
 
                     <hr class="text-muted border-secondary opacity-25">
 

@@ -18,7 +18,11 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nama Wahana <span class="text-danger">*</span></label>
-                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Kolam Renang Infinity" required>
+                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Jetski Basic" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Durasi <span class="text-muted small">(Contoh: 15 Menit)</span></label>
+                        <input type="text" name="durasi" class="form-control" placeholder="Contoh: 15 Menit / 1 Jam">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Harga <span class="text-danger">*</span></label>

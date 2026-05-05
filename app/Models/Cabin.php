@@ -9,9 +9,16 @@ class Cabin extends Model
     protected $fillable = [
         'name_cabin', 
         'deskripsi', 
-        'harga_per_malam', 
+        'harga_weekday',
+        'harga_weekend',
+        'harga_couple',
         'kapasitas', 
-        'status'
+        'status',
+        'fasilitas'
+    ];
+
+    protected $casts = [
+        'fasilitas' => 'array',
     ];
 
     public function galeris()
@@ -27,5 +34,10 @@ class Cabin extends Model
     public function booking_manuals()
     {
         return $this->hasMany(BookingManual::class);
+    }
+
+    public function units()
+    {
+        return $this->hasMany(CabinUnit::class);
     }
 }

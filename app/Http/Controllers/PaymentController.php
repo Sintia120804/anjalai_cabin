@@ -34,15 +34,17 @@ class PaymentController extends Controller
             $filename = 'bukti_' . time() . '_' . $booking->id . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('bukti_pembayaran', $filename, 'public');
 
-            // Update atau Create data pembayaran menggunakan updateOrCreate agar lebih aman
+            // Tentukan key pencarian: gunakan order_id jika ada, jika tidak gunakan booking_id (untuk data lama)
+            $searchKey = $booking->order_id ? ['order_id' => $booking->order_id] : ['booking_id' => $booking->id];
+
+            // Update data pembayaran menggunakan updateOrCreate berdasarkan order_id / booking_id
             $pembayaran = Pembayaran::updateOrCreate(
-                ['booking_id' => $booking->id],
+                $searchKey,
                 [
                     'bukti_pembayaran' => $path,
                     'tanggal_pembayaran' => now(),
                     'metode_pembayaran' => 'Transfer Bank',
                     'status_pembayaran' => 'pending', // Kembali ke pending untuk dicek admin
-                    'jumlah_bayar' => $booking->total_harga,
                 ]
             );
 

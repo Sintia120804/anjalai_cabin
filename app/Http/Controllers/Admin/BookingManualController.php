@@ -46,7 +46,9 @@ class BookingManualController extends Controller
             ];
         }
 
-        return view('admin.booking_manual.create', compact('cabins', 'bookedDates'));
+        $cabins = Cabin::all(); // Get all cabins to pass pricing data
+ 
+         return view('admin.booking_manual.create', compact('cabins', 'bookedDates'));
     }
 
     public function store(Request $request)
@@ -57,40 +59,82 @@ class BookingManualController extends Controller
             'no_hp' => 'required|string|max:20',
             'tanggal_checkin' => 'required|date',
             'tanggal_checkout' => 'required|date|after:tanggal_checkin',
+            'status_booking' => 'required|in:booked,check-in,check-out,cancelled',
         ]);
 
         $cabin = Cabin::findOrFail($request->cabin_id);
         $checkin = Carbon::parse($request->tanggal_checkin);
         $checkout = Carbon::parse($request->tanggal_checkout);
 
+        // Cari unit-unit dari kategori ini yang berstatus available
+        $availableUnits = $cabin->units()->where('status', 'available')->get();
+
+        if ($availableUnits->isEmpty()) {
+            return back()->withInput()->with('error', 'Pemesanan gagal! Belum ada unit kamar yang tersedia untuk kategori ini.');
+        }
+
         // Overlap Check with Online Booking
-        $isBookedOnline = Booking::where('cabin_id', $cabin->id)
+        $bookedOnlineUnitIds = Booking::where('cabin_id', $cabin->id)
             ->where('status_booking', '!=', 'ditolak')
             ->where('tanggal_checkin', '<', $checkout)
             ->where('tanggal_checkout', '>', $checkin)
-            ->exists();
+            ->whereNotNull('cabin_unit_id')
+            ->pluck('cabin_unit_id')
+            ->toArray();
 
         // Overlap Check with Manual Booking
-        $isBookedManual = BookingManual::where('cabin_id', $cabin->id)
+        $bookedManualUnitIds = BookingManual::where('cabin_id', $cabin->id)
+            ->where('status_booking', '!=', 'cancelled')
             ->where('tanggal_checkin', '<', $checkout)
             ->where('tanggal_checkout', '>', $checkin)
-            ->exists();
+            ->whereNotNull('cabin_unit_id')
+            ->pluck('cabin_unit_id')
+            ->toArray();
 
-        if ($isBookedOnline || $isBookedManual) {
-            return back()->withInput()->with('error', 'Pemesanan gagal! Tanggal ini sudah dipesan (bentrok jadwal).');
+        $allBookedUnitIds = array_unique(array_merge($bookedOnlineUnitIds, $bookedManualUnitIds));
+
+        // Cari 1 unit yang ID-nya TIDAK ADA di $allBookedUnitIds
+        $availableUnit = $availableUnits->whereNotIn('id', $allBookedUnitIds)->first();
+
+        if (!$availableUnit) {
+            return back()->withInput()->with('error', 'Pemesanan gagal! Semua unit Cabin penuh pada tanggal tersebut.');
         }
 
-        $diffDays = $checkin->diffInDays($checkout);
-        $totalHarga = $diffDays * $cabin->harga_per_malam;
+        $isCouple = $request->has('is_couple');
+        $totalHarga = 0;
+        
+        $currentDate = $checkin->copy()->startOfDay();
+        $endDate = $checkout->copy()->startOfDay();
+
+        if ($checkin->diffInHours($checkout) < 1) {
+            return back()->withInput()->with('error', 'Minimal durasi reservasi adalah 1 jam.');
+        }
+
+        while ($currentDate->lt($endDate)) {
+            if ($isCouple) {
+                $totalHarga += $cabin->harga_couple;
+            } else {
+                $day = $currentDate->dayOfWeek;
+                if ($day >= 0 && $day <= 4) { // Sunday to Thursday
+                    $totalHarga += $cabin->harga_weekday;
+                } else { // Friday to Saturday
+                    $totalHarga += $cabin->harga_weekend;
+                }
+            }
+            $currentDate->addDay();
+        }
 
         BookingManual::create([
             'admin_id' => auth()->id(),
             'cabin_id' => $cabin->id,
+            'cabin_unit_id' => $availableUnit->id,
             'nama_pengunjung' => $request->nama_pengunjung,
             'no_hp' => $request->no_hp,
-            'tanggal_checkin' => $checkin->format('Y-m-d'),
-            'tanggal_checkout' => $checkout->format('Y-m-d'),
+            'is_couple' => $isCouple,
+            'tanggal_checkin' => $checkin->format('Y-m-d H:i:s'),
+            'tanggal_checkout' => $checkout->format('Y-m-d H:i:s'),
             'total_harga' => $totalHarga,
+            'status_booking' => $request->status_booking,
         ]);
 
         return redirect()->route('admin.booking_manual.index')->with('success', 'Reservasi manual berhasil ditambahkan!');
@@ -107,12 +151,14 @@ class BookingManualController extends Controller
         $request->validate([
             'nama_pengunjung' => 'required|string|max:255',
             'no_hp' => 'required|string|max:20',
+            'status_booking' => 'required|in:booked,check-in,check-out,cancelled',
         ]);
 
         // Only allowing to change name and phone. To change date they must delete and recreate
         $booking_manual->update([
             'nama_pengunjung' => $request->nama_pengunjung,
             'no_hp' => $request->no_hp,
+            'status_booking' => $request->status_booking,
         ]);
 
         return redirect()->route('admin.booking_manual.index')->with('success', 'Data reservasi berhasil diperbarui!');

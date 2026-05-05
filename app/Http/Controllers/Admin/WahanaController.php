@@ -24,12 +24,13 @@ class WahanaController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'durasi' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'harga' => 'required|numeric|min:0',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5048'
         ]);
 
-        $data = $request->only(['nama', 'deskripsi', 'harga']);
+        $data = $request->only(['nama', 'durasi', 'deskripsi', 'harga']);
 
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('wahana', 'public');
@@ -50,12 +51,13 @@ class WahanaController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'durasi' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'harga' => 'required|numeric|min:0',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5048'
         ]);
 
-        $data = $request->only(['nama', 'deskripsi', 'harga']);
+        $data = $request->only(['nama', 'durasi', 'deskripsi', 'harga']);
 
         if ($request->hasFile('foto')) {
             if ($wahana->foto) {

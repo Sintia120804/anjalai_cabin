@@ -1,11 +1,11 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Kelola Pesanan Online')
+@section('title', 'Kelola Reservasi Online')
 
 @section('content')
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-            <h5 class="mb-0 fw-bold">Daftar Pesanan Online</h5>
+            <h5 class="mb-0 fw-bold">Daftar Reservasi Online</h5>
             <form action="{{ route('admin.booking.index') }}" method="GET" class="d-flex gap-2">
                 <input type="text" name="search" class="form-control rounded-pill" placeholder="Cari nama tamu / email..."
                     value="{{ request('search') }}">
@@ -33,19 +33,24 @@
                         @forelse($bookings as $index => $booking)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td><span class="fw-bold">BKG-{{ str_pad($booking->id, 5, '0', STR_PAD_LEFT) }}</span></td>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ str_pad($booking->id, 2, '0', STR_PAD_LEFT) }}</span>
+                                </td>
                                 <td>
                                     <div class="fw-bold">{{ $booking->user->name }}</div>
                                     <small class="text-muted">{{ $booking->user->email }}</small>
                                 </td>
-                                <td>{{ $booking->cabin->name_cabin }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ $booking->cabin->name_cabin }}</div>
+                                    <span class="badge bg-info bg-opacity-10 text-info small">{{ $booking->total_rooms }} Kamar</span>
+                                </td>
                                 <td>
                                     <div class="small fw-medium">
                                         {{ \Carbon\Carbon::parse($booking->tanggal_checkin)->format('d/m/Y') }}</div>
                                     <div class="small text-muted">
                                         {{ \Carbon\Carbon::parse($booking->tanggal_checkout)->format('d/m/Y') }}</div>
                                 </td>
-                                <td>Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</td>
+                                <td class="fw-bold text-primary">Rp {{ number_format($booking->total_order_price, 0, ',', '.') }}</td>
                                 <td>
                                     @if($booking->pembayaran && $booking->pembayaran->bukti_pembayaran)
                                         <a href="{{ asset('storage/' . $booking->pembayaran->bukti_pembayaran) }}" target="_blank">
@@ -85,7 +90,7 @@
                             <tr>
                                 <td colspan="9" class="text-center py-5 text-muted">
                                     <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-25"></i>
-                                    Belum ada riwayat pesanan online.
+                                    Belum ada riwayat reservasi online.
                                 </td>
                             </tr>
                         @endforelse

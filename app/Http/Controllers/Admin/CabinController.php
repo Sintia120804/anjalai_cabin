@@ -26,18 +26,24 @@ class CabinController extends Controller
         $request->validate([
             'name_cabin' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'harga_per_malam' => 'required|numeric|min:0',
+            'harga_weekday' => 'required|numeric|min:0',
+            'harga_weekend' => 'required|numeric|min:0',
+            'harga_couple' => 'nullable|numeric|min:0',
             'kapasitas' => 'required|integer|min:1',
             'status' => 'required|in:tersedia,tidak tersedia',
+            'fasilitas' => 'nullable|array',
             'fotos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5048'
         ]);
 
         $cabin = Cabin::create([
             'name_cabin' => $request->name_cabin,
             'deskripsi' => $request->deskripsi,
-            'harga_per_malam' => $request->harga_per_malam,
+            'harga_weekday' => $request->harga_weekday,
+            'harga_weekend' => $request->harga_weekend,
+            'harga_couple' => $request->harga_couple,
             'kapasitas' => $request->kapasitas,
             'status' => $request->status,
+            'fasilitas' => $request->fasilitas,
         ]);
 
         // Upload ke Galeris
@@ -67,9 +73,12 @@ class CabinController extends Controller
         $request->validate([
             'name_cabin' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'harga_per_malam' => 'required|numeric|min:0',
+            'harga_weekday' => 'required|numeric|min:0',
+            'harga_weekend' => 'required|numeric|min:0',
+            'harga_couple' => 'nullable|numeric|min:0',
             'kapasitas' => 'required|integer|min:1',
             'status' => 'required|in:tersedia,tidak tersedia',
+            'fasilitas' => 'nullable|array',
             'fotos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5048',
             'delete_fotos' => 'array'
         ]);
@@ -77,9 +86,12 @@ class CabinController extends Controller
         $cabin->update([
             'name_cabin' => $request->name_cabin,
             'deskripsi' => $request->deskripsi,
-            'harga_per_malam' => $request->harga_per_malam,
+            'harga_weekday' => $request->harga_weekday,
+            'harga_weekend' => $request->harga_weekend,
+            'harga_couple' => $request->harga_couple,
             'kapasitas' => $request->kapasitas,
             'status' => $request->status,
+            'fasilitas' => $request->fasilitas,
         ]);
 
         // Hapus foto jika ada yang dicentang

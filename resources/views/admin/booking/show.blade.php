@@ -7,7 +7,7 @@
         <a href="{{ route('admin.booking.index') }}" class="text-decoration-none text-muted mb-2 d-inline-block">
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
         </a>
-        <h5 class="fw-bold mb-0">Detail Reservasi #BKG-{{ str_pad($booking->id, 5, '0', STR_PAD_LEFT) }}</h5>
+        <h5 class="fw-bold mb-0">Detail Reservasi #BKG-{{ str_pad($booking->id, 5, '0', STR_PAD_LEFT) }} <span class="text-primary ms-2">({{ $booking->order_id }})</span></h5>
     </div>
 
     <div class="row g-4">
@@ -38,17 +38,21 @@
                         <div class="col-sm-4 text-muted">Jadwal Menginap</div>
                         <div class="col-sm-8">
                             <span
-                                class="fw-bold">{{ \Carbon\Carbon::parse($booking->tanggal_checkin)->format('d M Y') }}</span>
+                                class="fw-bold">{{ \Carbon\Carbon::parse($booking->tanggal_checkin)->format('d M Y H:i') }}</span>
                             s/d
                             <span
-                                class="fw-bold">{{ \Carbon\Carbon::parse($booking->tanggal_checkout)->format('d M Y') }}</span>
+                                class="fw-bold">{{ \Carbon\Carbon::parse($booking->tanggal_checkout)->format('d M Y H:i') }}</span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4 text-muted">Durasi & Tamu</div>
                         <div class="col-sm-8">
-                            {{ \Carbon\Carbon::parse($booking->tanggal_checkin)->diffInDays(\Carbon\Carbon::parse($booking->tanggal_checkout)) }}
-                            Malam,
+                            @php 
+                                $checkin = \Carbon\Carbon::parse($booking->tanggal_checkin);
+                                $checkout = \Carbon\Carbon::parse($booking->tanggal_checkout);
+                                $nights = ceil($checkin->diffInHours($checkout) / 24);
+                            @endphp
+                            {{ $nights }} Malam,
                             {{ $booking->jumlah_tamu }} Orang
                         </div>
                     </div>

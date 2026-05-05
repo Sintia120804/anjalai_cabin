@@ -20,13 +20,16 @@ class UserBookingController extends Controller
 
     public function index()
     {
-        // View user's bookings (Dashboard Pengunjung)
-        $bookings = Booking::with(['cabin', 'pembayaran'])
+        // View user's bookings (Dashboard Pengunjung) dikelompokkan berdasarkan order_id
+        $orders = Booking::with(['cabin', 'pembayaran'])
             ->where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->get()
+            ->groupBy(function($item) {
+                return $item->order_id ?? 'BKG-' . $item->id;
+            });
 
-        return view('user.dashboard', compact('bookings'));
+        return view('user.dashboard', compact('orders'));
     }
 
     public function store(Request $request, Cabin $cabin)
@@ -46,30 +49,66 @@ class UserBookingController extends Controller
         $tanggal_checkin = Carbon::parse($dates[0]);
         $tanggal_checkout = Carbon::parse($dates[1]);
 
-        // Cek bentrok (Overlap Check): Booking overlap jika (Mulai1 < Selesai2) DAN (Selesai1 > Mulai2)
-        // Cari di tabel Booking Online
-        $isBookedOnline = Booking::where('cabin_id', $cabin->id)
+        // Cari unit-unit dari kategori ini yang berstatus available
+        $availableUnits = $cabin->units()->where('status', 'available')->get();
+
+        if ($availableUnits->isEmpty()) {
+            return back()->with('error', 'Maaf, belum ada unit kamar yang tersedia untuk kategori ini.');
+        }
+
+        // Cari ID unit yang sudah dipesan (Overlap Check)
+        // Booking overlap jika (Mulai1 < Selesai2) DAN (Selesai1 > Mulai2)
+        $bookedOnlineUnitIds = Booking::where('cabin_id', $cabin->id)
             ->where('status_booking', '!=', 'ditolak')
             ->where('tanggal_checkin', '<', $tanggal_checkout)
             ->where('tanggal_checkout', '>', $tanggal_checkin)
-            ->exists();
+            ->whereNotNull('cabin_unit_id')
+            ->pluck('cabin_unit_id')
+            ->toArray();
 
-        // Cari di tabel Booking Manual
-        $isBookedManual = \App\Models\BookingManual::where('cabin_id', $cabin->id)
+        $bookedManualUnitIds = \App\Models\BookingManual::where('cabin_id', $cabin->id)
+            ->where('status_booking', '!=', 'cancelled')
             ->where('tanggal_checkin', '<', $tanggal_checkout)
             ->where('tanggal_checkout', '>', $tanggal_checkin)
-            ->exists();
+            ->whereNotNull('cabin_unit_id')
+            ->pluck('cabin_unit_id')
+            ->toArray();
 
-        if ($isBookedOnline || $isBookedManual) {
-            return back()->with('error', 'Maaf, Cabin ini sudah dipesan pada tanggal tersebut (baik secara online maupun offline). Silakan pilih tanggal lain.');
+        $allBookedUnitIds = array_unique(array_merge($bookedOnlineUnitIds, $bookedManualUnitIds));
+
+        // Cari 1 unit yang ID-nya TIDAK ADA di $allBookedUnitIds
+        $availableUnit = $availableUnits->whereNotIn('id', $allBookedUnitIds)->first();
+
+        if (!$availableUnit) {
+            return back()->with('error', 'Maaf, semua unit Cabin penuh pada rentang tanggal tersebut. Silakan pilih tanggal lain.');
         }
 
-        // Kalkulasi Total Harga Basic
-        $diffDays = $tanggal_checkin->diffInDays($tanggal_checkout);
-        if ($diffDays < 1) {
-            return back()->with('error', 'Minimal menginap adalah 1 malam.');
+        // Kalkulasi Total Harga Basic (Berdasarkan blok 24 jam)
+        $isCouple = $request->has('is_couple');
+        $totalHargaBase = 0;
+        
+        $currentDate = $tanggal_checkin->copy()->startOfDay();
+        $endDate = $tanggal_checkout->copy()->startOfDay();
+
+        if ($tanggal_checkin->diffInHours($tanggal_checkout) < 1) {
+            return back()->with('error', 'Minimal menginap adalah 1 jam.');
         }
-        $totalHargaBase = $diffDays * $cabin->harga_per_malam;
+
+        while ($currentDate->lt($endDate)) {
+            if ($isCouple) {
+                $totalHargaBase += $cabin->harga_couple;
+            } else {
+                // Day of week: 0 (Sun) to 6 (Sat)
+                // Carbon's dayOfWeek: 0 (Sunday) to 6 (Saturday)
+                $day = $currentDate->dayOfWeek;
+                if ($day >= 0 && $day <= 4) { // Sunday to Thursday
+                    $totalHargaBase += $cabin->harga_weekday;
+                } else { // Friday to Saturday
+                    $totalHargaBase += $cabin->harga_weekend;
+                }
+            }
+            $currentDate->addDay();
+        }
 
         // Proses Fasilitas Tambahan
         $totalHargaFasilitas = 0;
@@ -95,9 +134,11 @@ class UserBookingController extends Controller
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'cabin_id' => $cabin->id,
-            'tanggal_checkin' => $tanggal_checkin->format('Y-m-d'),
-            'tanggal_checkout' => $tanggal_checkout->format('Y-m-d'),
+            'cabin_unit_id' => $availableUnit->id,
+            'tanggal_checkin' => $tanggal_checkin->format('Y-m-d H:i:s'),
+            'tanggal_checkout' => $tanggal_checkout->format('Y-m-d H:i:s'),
             'jumlah_tamu' => $request->jumlah_tamu,
+            'is_couple' => $isCouple,
             'fasilitas_tambahan' => $fasilitasTambahanJson,
             'total_harga_fasilitas' => $totalHargaFasilitas,
             'total_harga' => $totalHargaAkhir,

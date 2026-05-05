@@ -100,7 +100,7 @@
 <div class="py-5" id="cabins" style="background-color: #f8fafc;">
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Akomodasi Kami</h6>
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Room Kami</h6>
             <h2 class="display-5 fw-bold text-dark">Pilih Ruang Santaimu</h2>
             <div class="mx-auto bg-primary mt-3 mb-4 rounded" style="height: 4px; width: 60px;"></div>
             
@@ -127,6 +127,11 @@
                                     <i class="bi bi-image fs-1"></i>
                                 </div>
                             @endif
+                            <div class="position-absolute top-0 start-0 m-3 z-2">
+                                <span class="badge bg-warning text-dark py-2 px-3 rounded-pill shadow-sm fw-bold">
+                                    Tersedia {{ $cabin->sisa_kamar }} Kamar
+                                </span>
+                            </div>
                             <div class="position-absolute top-0 end-0 m-3 z-2">
                                 <span class="badge bg-white text-dark py-2 px-3 rounded-pill shadow-sm fw-bold">
                                     Maks. {{ $cabin->kapasitas }} Orang
@@ -141,8 +146,7 @@
                                 {{ $cabin->deskripsi ?? 'Nikmati kenyamanan kabin premium kami yang dirancang menyatu dengan alam bebas.' }}
                             </p>
                             <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border">
-                                <div class="text-muted small">Harga Mulai</div>
-                                <div class="fs-5 fw-bold text-primary">Rp {{ number_format($cabin->harga_per_malam, 0, ',', '.') }}<span class="fs-6 text-muted fw-normal">/mlm</span></div>
+                                <div class="fs-5 fw-bold text-primary">Rp {{ number_format($cabin->harga_weekday, 0, ',', '.') }}<span class="fs-6 text-muted fw-normal">/mlm</span></div>
                             </div>
                         </div>
                         <div class="card-footer bg-white border-0 p-4 pt-0">
@@ -189,8 +193,13 @@
                         @endif
                     </div>
                     <div class="card-body p-4 text-center">
-                        <h5 class="fw-bold mb-1">{{ $w->nama }}</h5>
-                        <div class="text-primary fw-bold mb-3">Rp {{ number_format($w->harga, 0, ',', '.') }}</div>
+                        <h5 class="fw-bold mb-3">{{ $w->nama }}</h5>
+                        <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                            @if($w->durasi)
+                                <span class="h5 fw-bold mb-0 text-dark">{{ strtoupper($w->durasi) }}</span>
+                            @endif
+                            <span class="h5 fw-bold text-primary mb-0">IDR {{ number_format($w->harga / 1000, 0, ',', '.') }}K</span>
+                        </div>
                         <p class="text-muted small mb-0">{{ $w->deskripsi }}</p>
                     </div>
                 </div>
@@ -269,40 +278,13 @@
     </div>
 </div>
 
-<!-- ⑤ Map Location Section -->
-
-<div class="py-5" style="background-color: #f8fafc;">
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Lokasi Kami</h6>
-            <h2 class="display-5 fw-bold">Temukan Jalan Menuju Ketenangan</h2>
-            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
-        </div>
-        <div class="rounded-4 overflow-hidden shadow-lg border border-white border-4" style="height: 450px;">
-            <iframe 
-                src="https://maps.google.com/maps?q=Anjalai%20Nature%20Cabin%20Solok&t=&z=15&ie=UTF8&iwloc=&output=embed" 
-                width="100%" 
-                height="100%" 
-                style="border:0;" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-        </div>
-        <div class="text-center mt-4">
-            <p class="text-muted"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Taluak anjalai, Kec. Lembah Gumanti, Kabupaten Solok, Sumatera Barat 27371</p>
-        </div>
-    </div>
-</div>
-
-<!-- ④ Gallery Section (paling bawah) -->
-
-<div class="py-5" id="galeri" style="background-color: #0f172a; color: white;">
+<!-- ④ Gallery Section -->
+<div class="py-5" id="galeri" style="background-color: #fff; color: #1e293b;">
     <div class="container py-5 text-center">
         <div class="mb-5">
             <h6 class="text-primary fw-bold text-uppercase tracking-wider">Galeri Resort</h6>
-            <h2 class="display-5 fw-bold text-white">Sudut Estetik Kami</h2>
-            <p class="opacity-75">Intip setiap sudut keindahan yang siap menyambut kedatangan Anda.</p>
+            <h2 class="display-5 fw-bold text-dark">Sudut Estetik Kami</h2>
+            <p class="text-muted">Intip setiap sudut keindahan yang siap menyambut kedatangan Anda.</p>
         </div>
 
         <div class="row g-3">
@@ -323,6 +305,31 @@
             @empty
             <div class="col-12 opacity-50 fst-italic py-5">Belum ada foto galeri umum.</div>
             @endforelse
+        </div>
+    </div>
+</div>
+
+<!-- ⑤ Map Location Section (paling bawah) -->
+<div class="py-5" id="lokasi" style="background-color: #f8fafc;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Lokasi Kami</h6>
+            <h2 class="display-5 fw-bold">Temukan Jalan Menuju Ketenangan</h2>
+            <div class="mx-auto bg-primary mt-3 rounded" style="height: 4px; width: 60px;"></div>
+        </div>
+        <div class="rounded-4 overflow-hidden shadow-lg border border-white border-4" style="height: 450px;">
+            <iframe 
+                src="https://maps.google.com/maps?q=Anjalai%20Nature%20Cabin%20Solok&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+        <div class="text-center mt-4">
+            <p class="text-muted"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Taluak anjalai, Kec. Lembah Gumanti, Kabupaten Solok, Sumatera Barat 27371</p>
         </div>
     </div>
 </div>

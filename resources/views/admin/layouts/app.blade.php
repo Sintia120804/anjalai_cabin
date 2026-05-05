@@ -183,7 +183,7 @@
                     class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center justify-content-between {{ request()->routeIs('admin.booking.*') ? 'bg-primary shadow-sm' : '' }}">
                     <div class="d-flex align-items-center gap-3">
                         <i class="bi bi-calendar-check fs-5"></i>
-                        <span>Pesanan Online</span>
+                        <span>Reservasi Online</span>
                     </div>
                     @php
                         $pendingBookingCount = \App\Models\Booking::where('status_booking', 'pending')->count();
@@ -196,7 +196,7 @@
             <li class="nav-item">
                 <a href="{{ route('admin.booking_manual.index') }}"
                     class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.booking_manual.*') ? 'bg-primary shadow-sm' : '' }}">
-                    <i class="bi bi-person-plus fs-5"></i> Booking Manual
+                    <i class="bi bi-person-plus fs-5"></i> Reservasi Manual
                 </a>
             </li>
             <li class="nav-item">
@@ -205,13 +205,6 @@
                     <i class="bi bi-flag fs-5"></i> Kelola Wahana
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.fasilitas_tambahan.index') }}"
-                    class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.fasilitas_tambahan*') ? 'bg-primary shadow-sm' : '' }}">
-                    <i class="bi bi-box-seam fs-5"></i> Fasilitas Tambahan
-                </a>
-            </li>
-
             <li class="nav-item">
                 <a href="{{ route('admin.galeri_umum.index') }}"
                     class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.galeri_umum.*') ? 'bg-primary shadow-sm' : '' }}">
