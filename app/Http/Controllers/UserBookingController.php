@@ -18,8 +18,31 @@ class UserBookingController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        // Handle Midtrans redirect parameters for localhost/sandbox testing
+        if ($request->has('order_id') && ($request->get('transaction_status') === 'settlement' || $request->get('status_code') === '200')) {
+            $orderId = $request->get('order_id');
+            
+            // Strip timestamp suffix if present
+            $baseOrderId = $orderId;
+            if (str_contains($orderId, '-')) {
+                $parts = explode('-', $orderId);
+                if (is_numeric(end($parts)) && strlen(end($parts)) >= 9) {
+                    array_pop($parts);
+                    $baseOrderId = implode('-', $parts);
+                }
+            }
+
+            $pembayaran = Pembayaran::where('order_id', $baseOrderId)->first();
+            if ($pembayaran && $pembayaran->status_pembayaran === 'pending') {
+                $pembayaran->status_pembayaran = 'diterima';
+                $pembayaran->metode_pembayaran = 'Midtrans Gateway';
+                $pembayaran->tanggal_pembayaran = now();
+                $pembayaran->save();
+            }
+        }
+
         // View user's bookings (Dashboard Pengunjung) dikelompokkan berdasarkan order_id
         $orders = Booking::with(['cabin', 'pembayaran'])
             ->where('user_id', Auth::id())
@@ -173,11 +196,47 @@ class UserBookingController extends Controller
             abort(403);
         }
 
-        if ($booking->status_booking === 'pending' || $booking->pembayaran?->status_pembayaran === 'pending') {
-            $booking->delete();
+        $pembayaran = $booking->order_id ? \App\Models\Pembayaran::where('order_id', $booking->order_id)->first() : \App\Models\Pembayaran::where('booking_id', $booking->id)->first();
+
+        if ($booking->status_booking === 'pending' || in_array($pembayaran?->status_pembayaran, ['pending', 'menunggu_konfirmasi'])) {
+            if ($booking->order_id) {
+                $bookings = Booking::where('order_id', $booking->order_id)->get();
+                foreach ($bookings as $b) {
+                    $b->delete();
+                }
+            } else {
+                $booking->delete();
+            }
             return redirect()->route('user.dashboard')->with('success', 'Reservasi berhasil dibatalkan.');
         }
 
         return redirect()->route('user.dashboard')->with('error', 'Reservasi tidak dapat dibatalkan karena sudah diproses.');
+    }
+
+    public function exportPdf($orderId)
+    {
+        // Cari semua booking dengan orderId tersebut milik user ini
+        $orderBookings = Booking::with(['cabin', 'pembayaran'])
+            ->where('user_id', Auth::id())
+            ->where(function($query) use ($orderId) {
+                $query->where('order_id', $orderId)
+                      ->orWhere('id', str_replace('BKG-', '', $orderId));
+            })
+            ->get();
+
+        if ($orderBookings->isEmpty()) {
+            return back()->with('error', 'Pesanan tidak ditemukan.');
+        }
+
+        $firstBooking = $orderBookings->first();
+        $pembayaran = $firstBooking->order_id 
+            ? Pembayaran::where('order_id', $firstBooking->order_id)->first() 
+            : Pembayaran::where('booking_id', $firstBooking->id)->first();
+            
+        $grandTotal = $orderBookings->sum('total_harga');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.booking_pdf', compact('orderBookings', 'firstBooking', 'pembayaran', 'grandTotal', 'orderId'));
+        
+        return $pdf->download('Bukti-Booking-' . $orderId . '.pdf');
     }
 }

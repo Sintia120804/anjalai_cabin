@@ -276,12 +276,8 @@
                             <div class="d-flex justify-content-between mb-1 small">
                                 <span class="text-muted">Harga Kamar (<span id="summaryKamar">1</span> kamar)</span>
                                 <span class="fw-bold" id="summaryBase">Rp 0</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1 small d-none" id="summaryFasilitasRow">
-                                <span class="text-muted">Fasilitas Tambahan</span>
-                                <span class="fw-bold" id="summaryFasilitas">Rp 0</span>
-                            </div>
-                            <div class="d-flex justify-content-between pt-2 border-top border-primary border-opacity-25">
+                           z </div>
+                            <div class="d-flex justify-content-between pt-2 border-top border-primary border-opacity-25">   
                                 <span class="fw-bold">Estimasi Total</span>
                                 <span class="fw-bold text-primary fs-5" id="summaryTotal">Rp 0</span>
                             </div>
@@ -380,8 +376,11 @@
                     if(btnOpen) btnOpen.disabled = false;
 
                     // Update Badge Ketersediaan secara real-time
-                    const checkin  = dates[0].toISOString().split('T')[0];
-                    const checkout = dates[1].toISOString().split('T')[0];
+                    // Hindari penggunaan toISOString() karena mengonversi ke UTC yang bisa merubah tanggal di zona waktu lokal
+                    const pad = (n) => n < 10 ? '0' + n : n;
+                    const checkin = dates[0].getFullYear() + '-' + pad(dates[0].getMonth() + 1) + '-' + pad(dates[0].getDate());
+                    const checkout = dates[1].getFullYear() + '-' + pad(dates[1].getMonth() + 1) + '-' + pad(dates[1].getDate());
+                    
                     fetch(`/cabin/${cabinId}/available-units?checkin=${encodeURIComponent(checkin)}&checkout=${encodeURIComponent(checkout)}`)
                         .then(r => r.json())
                         .then(data => {
@@ -398,8 +397,34 @@
             // ───── Buka Modal ─────
             if(btnOpen){
                 btnOpen.addEventListener('click', function(){
+                    const maxTamu = {{ $cabin->kapasitas }};
+                    const inputTamuVal = tamu ? parseInt(tamu.value) : 1;
+                    if (inputTamuVal > maxTamu) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Jumlah tamu melebihi kapasitas kabin (maksimal ' + maxTamu + ' orang)!',
+                            confirmButtonColor: '#2563eb'
+                        });
+                        return;
+                    }
+                    if (inputTamuVal < 1) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Jumlah tamu minimal adalah 1 orang!',
+                            confirmButtonColor: '#2563eb'
+                        });
+                        return;
+                    }
+
                     if(selectedDates.length < 2){
-                        alert('Silakan pilih tanggal Check-In dan Check-Out terlebih dahulu!');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Pilih Tanggal',
+                            text: 'Silakan pilih tanggal Check-In dan Check-Out terlebih dahulu!',
+                            confirmButtonColor: '#2563eb'
+                        });
                         return;
                     }
 
@@ -413,7 +438,12 @@
                             const available = data.available ?? totalUnits;
 
                             if(available < 1){
-                                alert('Maaf, tidak ada kamar tersedia pada tanggal ini.');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Kamar Penuh',
+                                    text: 'Maaf, tidak ada kamar tersedia pada tanggal ini.',
+                                    confirmButtonColor: '#2563eb'
+                                });
                                 return;
                             }
 
@@ -442,7 +472,12 @@
                         .catch(() => {
                             // Fallback: buka modal tanpa fetch, tapi pastikan ada unit
                             if(totalUnits < 1){
-                                alert('Maaf, kabin ini belum memiliki unit kamar terdaftar.');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Unit Tidak Tersedia',
+                                    text: 'Maaf, kabin ini belum memiliki unit kamar terdaftar.',
+                                    confirmButtonColor: '#2563eb'
+                                });
                                 return;
                             }
                             const rawDates = document.getElementById('datepicker').value;
@@ -471,49 +506,17 @@
                 if(parseInt(inp.value) > 1) { inp.value = parseInt(inp.value)-1; updateModalSummary(); }
             });
             document.getElementById('modalJumlahKamar')?.addEventListener('input', updateModalSummary);
-            document.querySelectorAll('.fasilitas-checkbox-modal').forEach(cb => cb.addEventListener('change', updateModalSummary));
 
             function updateModalSummary(){
                 const kamar = parseInt(document.getElementById('modalJumlahKamar').value) || 1;
-                let fasilitasPrice = 0;
-                const fasIds = [];
-                document.querySelectorAll('.fasilitas-checkbox-modal:checked').forEach(cb => {
-                    fasilitasPrice += parseInt(cb.getAttribute('data-harga') || 0);
-                    fasIds.push(cb.value);
-                });
-                document.getElementById('modalFasilitas').value = fasIds.join(',');
-
-                const baseTotal = basePricePerKamar * kamar;
-                const fasTotal  = fasilitasPrice * kamar;
-                const grandTotal = baseTotal + fasTotal;
+                const grandTotal = basePricePerKamar * kamar;
 
                 document.getElementById('summaryKamar').innerText = kamar;
-                document.getElementById('summaryBase').innerText   = 'Rp ' + new Intl.NumberFormat('id-ID').format(baseTotal);
+                document.getElementById('summaryBase').innerText   = 'Rp ' + new Intl.NumberFormat('id-ID').format(grandTotal);
                 document.getElementById('summaryTotal').innerText  = 'Rp ' + new Intl.NumberFormat('id-ID').format(grandTotal);
-
-                const fasRow = document.getElementById('summaryFasilitasRow');
-                if(fasTotal > 0){
-                    fasRow.classList.remove('d-none');
-                    document.getElementById('summaryFasilitas').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(fasTotal);
-                } else {
-                    fasRow.classList.add('d-none');
-                }
             }
 
-            // ───── Submit: ubah fasilitas dari checkbox ke hidden field ─────
-            document.getElementById('cartForm')?.addEventListener('submit', function(){
-                // Kumpulkan fasilitas yang dicentang lalu masukkan ke field hidden
-                const checked = [];
-                document.querySelectorAll('.fasilitas-checkbox-modal:checked').forEach(cb => checked.push(cb.value));
-                // Hapus semua input fasilitas[] lama
-                document.querySelectorAll('input[name="fasilitas[]"]').forEach(el => el.remove());
-                // Tambahkan baru
-                checked.forEach(id => {
-                    const inp = document.createElement('input');
-                    inp.type = 'hidden'; inp.name = 'fasilitas[]'; inp.value = id;
-                    this.appendChild(inp);
-                });
-            });
+            // Submit handler removed as no special processing needed
         });
         </script>
     @endpush

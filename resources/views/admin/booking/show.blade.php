@@ -7,7 +7,7 @@
         <a href="{{ route('admin.booking.index') }}" class="text-decoration-none text-muted mb-2 d-inline-block">
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
         </a>
-        <h5 class="fw-bold mb-0">Detail Reservasi #BKG-{{ str_pad($booking->id, 5, '0', STR_PAD_LEFT) }} <span class="text-primary ms-2">({{ $booking->order_id }})</span></h5>
+        <h5 class="fw-bold mb-0">Detail Reservasi NO-{{ str_pad($booking->id, 5, '0', STR_PAD_LEFT) }} <span class="text-primary ms-2">({{ $booking->order_id }})</span></h5>
     </div>
 
     <div class="row g-4">
@@ -30,52 +30,56 @@
                         <div class="col-sm-8">{{ $booking->user->no_hp ?? '-' }}</div>
                     </div>
                     <hr class="my-4 opacity-10">
-                    <div class="row mb-3">
-                        <div class="col-sm-4 text-muted">Nama Cabin</div>
-                        <div class="col-sm-8 fw-bold">{{ $booking->cabin->name_cabin }}</div>
+                    
+                    <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-door-open-fill me-1"></i> Rincian Kamar yang Dipesan ({{ count($allBookings) }} Kamar)</h6>
+                    
+                    <div class="table-responsive mb-4 border rounded-3 overflow-hidden">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="py-3 ps-3 small fw-bold text-muted">NAMA KAMAR / KATEGORI</th>
+                                    <th class="py-3 small fw-bold text-muted">JADWAL MENGINAP</th>
+                                    <th class="py-3 small fw-bold text-muted text-center">DURASI</th>
+                                    <th class="py-3 text-end pe-3 small fw-bold text-muted">HARGA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $totalOrder = 0; @endphp
+                                @foreach($allBookings as $b)
+                                    @php
+                                        $checkin = \Carbon\Carbon::parse($b->tanggal_checkin);
+                                        $checkout = \Carbon\Carbon::parse($b->tanggal_checkout);
+                                        $nights = ceil($checkin->diffInHours($checkout) / 24);
+                                        $totalOrder += $b->total_harga;
+                                    @endphp
+                                    <tr class="border-bottom">
+                                        <td class="py-3 ps-3">
+                                            <div class="fw-bold text-dark">{{ $b->cabin->name_cabin }}</div>
+                                            <span class="badge bg-light text-muted border extra-small">#BKG-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="small d-block fw-bold text-secondary">{{ $checkin->format('d M Y H:i') }}</span>
+                                            <span class="small text-muted d-block my-1 text-center" style="width: fit-content; margin-left: 2px;">s/d</span>
+                                            <span class="small d-block fw-bold text-secondary">{{ $checkout->format('d M Y H:i') }}</span>
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            <span class="small d-block fw-bold text-dark">{{ $nights }} Malam</span>
+                                            <span class="small text-muted d-block">{{ $b->jumlah_tamu }} Orang</span>
+                                        </td>
+                                        <td class="py-3 text-end pe-3">
+                                            <span class="fw-bold text-primary">Rp {{ number_format($b->total_harga, 0, ',', '.') }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-sm-4 text-muted">Jadwal Menginap</div>
-                        <div class="col-sm-8">
-                            <span
-                                class="fw-bold">{{ \Carbon\Carbon::parse($booking->tanggal_checkin)->format('d M Y H:i') }}</span>
-                            s/d
-                            <span
-                                class="fw-bold">{{ \Carbon\Carbon::parse($booking->tanggal_checkout)->format('d M Y H:i') }}</span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-sm-4 text-muted">Durasi & Tamu</div>
-                        <div class="col-sm-8">
-                            @php 
-                                $checkin = \Carbon\Carbon::parse($booking->tanggal_checkin);
-                                $checkout = \Carbon\Carbon::parse($booking->tanggal_checkout);
-                                $nights = ceil($checkin->diffInHours($checkout) / 24);
-                            @endphp
-                            {{ $nights }} Malam,
-                            {{ $booking->jumlah_tamu }} Orang
-                        </div>
-                    </div>
-                    @php $fasilitas = json_decode($booking->fasilitas_tambahan, true); @endphp
-                    @if($fasilitas && count($fasilitas) > 0)
-                        <div class="row mb-3">
-                            <div class="col-sm-4 text-muted">Fasilitas Tambahan</div>
-                            <div class="col-sm-8">
-                                <ul class="list-unstyled mb-0 d-flex flex-column gap-1">
-                                    @foreach($fasilitas as $item)
-                                        <li><i class="bi bi-check2 text-success me-1"></i> {{ $item['nama'] }} <span
-                                                class="badge bg-light text-dark border ms-1">Rp{{ number_format($item['harga'], 0, ',', '.') }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
+
                     <div class="row mb-3">
                         <div class="col-sm-4 text-muted">Total Bayar</div>
-                        <div class="col-sm-8 h5 fw-bold text-primary">Rp
-                            {{ number_format($booking->total_harga, 0, ',', '.') }}</div>
+                        <div class="col-sm-8 h4 fw-bold text-primary">Rp {{ number_format($totalOrder, 0, ',', '.') }}</div>
                     </div>
+                    
                     <div class="row mb-0">
                         <div class="col-sm-4 text-muted">Status Booking</div>
                         <div class="col-sm-8">
@@ -98,7 +102,7 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
                     <h6 class="fw-bold mb-3">Aksi Admin</h6>
-                    @if($booking->status_booking !== 'diterima')
+                    @if(!in_array($booking->status_booking, ['diterima', 'ditolak']))
                         <form action="{{ route('admin.booking.updateStatus', $booking->id) }}" method="POST">
                             @csrf
                             @method('PATCH')
@@ -123,11 +127,17 @@
                                 </div>
                             @endif
                         </form>
-                    @else
+                    @elseif($booking->status_booking === 'diterima')
                         <div class="text-center py-2">
                             <i class="bi bi-check-circle-fill text-success fs-2"></i>
                             <p class="small fw-bold text-success mt-2 mb-0">Pesanan Telah Divalidasi</p>
                             <p class="text-muted extra-small">Status pesanan ini sudah final (Diterima).</p>
+                        </div>
+                    @elseif($booking->status_booking === 'ditolak')
+                        <div class="text-center py-2">
+                            <i class="bi bi-x-circle-fill text-danger fs-2"></i>
+                            <p class="small fw-bold text-danger mt-2 mb-0">Pesanan Telah Ditolak</p>
+                            <p class="text-muted extra-small">Status pesanan ini sudah final (Ditolak).</p>
                         </div>
                     @endif
                 </div>
@@ -145,7 +155,11 @@
                         </h5>
                         <div class="mb-3">
                             @if($booking->pembayaran->status_pembayaran === 'diterima')
-                                <span class="badge bg-success px-3 py-2 rounded-pill">Lunas</span>
+                                <span class="badge bg-success px-3 py-2 rounded-pill">Lunas & Terkonfirmasi</span>
+                            @elseif($booking->pembayaran->status_pembayaran === 'menunggu_konfirmasi')
+                                <span class="badge bg-info text-dark px-3 py-2 rounded-pill">Lunas (Menunggu Konfirmasi)</span>
+                            @elseif($booking->pembayaran->status_pembayaran === 'ditolak')
+                                <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
                             @else
                                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Pending</span>
                             @endif

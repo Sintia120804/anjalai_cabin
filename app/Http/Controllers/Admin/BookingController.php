@@ -10,14 +10,12 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil ID booking pertama dari setiap order_id unik
-        $latestIds = Booking::selectRaw('MIN(id) as id')
-            ->groupBy('order_id')
-            ->pluck('id');
 
-        $query = Booking::whereIn('id', $latestIds)
-            ->with(['user', 'cabin', 'pembayaran'])
+        $query = Booking::with(['user', 'cabin', 'pembayaran'])
             ->latest();
+
+        $newQuery = Booking::orderBy('id','DESC')->get();
+        // dd($newQuery);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -40,8 +38,13 @@ class BookingController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['user', 'cabin', 'pembayaran']);
-        return view('admin.booking.show', compact('booking'));
+        $booking->load(['user', 'pembayaran']);
+        
+        $allBookings = $booking->order_id
+            ? Booking::with('cabin')->where('order_id', $booking->order_id)->get()
+            : collect([$booking]);
+            
+        return view('admin.booking.show', compact('booking', 'allBookings'));
     }
 
     public function updateStatus(Request $request, Booking $booking)
@@ -65,6 +68,8 @@ class BookingController extends Controller
                     'status_pembayaran' => 'diterima',
                     'tanggal_pembayaran' => $pembayaran->tanggal_pembayaran ?? now()
                 ]);
+            } elseif ($request->status_booking === 'pending') {
+                $pembayaran->update(['status_pembayaran' => 'pending']);
             }
         }
 

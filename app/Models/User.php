@@ -22,15 +22,11 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-    
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);
     }
-    
-    public function testimonis()
-    {
-        return $this->hasMany(Testimoni::class);
-    }
+
 
 }

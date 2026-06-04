@@ -23,6 +23,7 @@ Route::get('/auth/google/callback', [\App\Http\Controllers\SocialiteController::
 Route::get('/', [PublicCabinController::class, 'index'])->name('welcome');
 Route::get('/cabin/{cabin}', [PublicCabinController::class, 'show'])->name('cabin.show');
 Route::get('/cabin/{cabin}/available-units', [PublicCabinController::class, 'availableUnits'])->name('cabin.available_units');
+Route::get('/wahana/{wahana}', [PublicCabinController::class, 'showWahana'])->name('wahana.show');
 
 // Admin Routes
 Route::prefix('admin')
@@ -69,9 +70,16 @@ Route::middleware(['auth'])->group(function () {
      Route::post('/cart/checkout', [\App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout');
 
      Route::delete('/booking/{booking}', [UserBookingController::class, 'destroy'])->name('user.booking.destroy');
+     Route::get('/booking/{orderId}/pdf', [UserBookingController::class, 'exportPdf'])->name('user.booking.pdf');
 
      // Manual Payment Upload
      Route::post('/payment/upload/{booking}', [PaymentController::class, 'uploadProof'])->name('payment.upload');
 
+     // Midtrans AJAX Snap Token
+     Route::get('/payment/snap-token/{orderId}', [PaymentController::class, 'getSnapToken'])->name('payment.snap_token');
 });
+
+// Midtrans Webhook Callback (Exempt from CSRF in bootstrap/app.php)
+Route::post('/midtrans/callback', [PaymentController::class, 'handleCallback'])->name('midtrans.callback');
+Route::post('/midtrans/frontend-success', [PaymentController::class, 'frontendSuccess'])->name('midtrans.frontend_success');
 

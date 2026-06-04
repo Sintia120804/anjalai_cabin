@@ -41,8 +41,20 @@ class PublicCabinController extends Controller
 
                 $totalBooked = $bookedOnlineCount + $bookedManualCount;
                 
+                $kamarDiKeranjang = 0;
+                $cart = session()->get('cart', []);
+                foreach ($cart as $item) {
+                    if ($item['cabin_id'] == $cabin->id) {
+                        $itemCheckin = \Carbon\Carbon::parse($item['tanggal_checkin']);
+                        $itemCheckout = \Carbon\Carbon::parse($item['tanggal_checkout']);
+                        if ($checkin->lt($itemCheckout) && $checkout->gt($itemCheckin)) {
+                            $kamarDiKeranjang += $item['jumlah_kamar'];
+                        }
+                    }
+                }
+                
                 // Set atribut dinamis untuk ditampilkan di view (sisa kamar)
-                $cabin->sisa_kamar = max(0, $totalUnits - $totalBooked);
+                $cabin->sisa_kamar = max(0, $totalUnits - $totalBooked - $kamarDiKeranjang);
 
                 return $cabin->sisa_kamar > 0;
             });
@@ -73,7 +85,20 @@ class PublicCabinController extends Controller
                     ->pluck('cabin_unit_id')->toArray();
 
                 $totalBooked = count(array_unique(array_merge($bookedOnlineIds, $bookedManualIds)));
-                $cabin->sisa_kamar = max(0, $totalUnits - $totalBooked);
+                
+                $kamarDiKeranjang = 0;
+                $cart = session()->get('cart', []);
+                foreach ($cart as $item) {
+                    if ($item['cabin_id'] == $cabin->id) {
+                        $itemCheckin = \Carbon\Carbon::parse($item['tanggal_checkin']);
+                        $itemCheckout = \Carbon\Carbon::parse($item['tanggal_checkout']);
+                        if ($today_start->lt($itemCheckout) && $today_end->gt($itemCheckin)) {
+                            $kamarDiKeranjang += $item['jumlah_kamar'];
+                        }
+                    }
+                }
+                
+                $cabin->sisa_kamar = max(0, $totalUnits - $totalBooked - $kamarDiKeranjang);
             });
         }
 
@@ -164,6 +189,18 @@ class PublicCabinController extends Controller
         $allBookedNowIds = array_unique(array_merge($bookedOnlineNowIds, $bookedManualNowIds));
         $sisaKamar = max(0, $allUnits->whereNotIn('id', $allBookedNowIds)->count());
 
+        $kamarDiKeranjang = 0;
+        $cart = session()->get('cart', []);
+        foreach ($cart as $item) {
+            if ($item['cabin_id'] == $cabin->id) {
+                $itemCheckout = \Carbon\Carbon::parse($item['tanggal_checkout']);
+                if ($itemCheckout->gt($now)) {
+                    $kamarDiKeranjang += $item['jumlah_kamar'];
+                }
+            }
+        }
+        $sisaKamar = max(0, $sisaKamar - $kamarDiKeranjang);
+
         return view('cabin.show', compact('cabin', 'fullyBookedDates', 'sisaKamar'));
     }
 
@@ -197,9 +234,33 @@ class PublicCabinController extends Controller
         $allBookedIds = array_unique(array_merge($bookedOnlineIds, $bookedManualIds));
         $available = $allUnits->whereNotIn('id', $allBookedIds)->count();
 
+        // Kurangi dengan yang ada di keranjang
+        $cart = session()->get('cart', []);
+        $kamarDiKeranjang = 0;
+        foreach ($cart as $item) {
+            if ($item['cabin_id'] == $cabin->id) {
+                $itemCheckin = \Carbon\Carbon::parse($item['tanggal_checkin']);
+                $itemCheckout = \Carbon\Carbon::parse($item['tanggal_checkout']);
+                if ($checkin->lt($itemCheckout) && $checkout->gt($itemCheckin)) {
+                    $kamarDiKeranjang += $item['jumlah_kamar'];
+                }
+            }
+        }
+        $available = $available - $kamarDiKeranjang;
+
         return response()->json([
             'available' => max(0, $available),
             'total'     => $totalUnits,
         ]);
     }
+
+    /**
+     * Tampilkan halaman detail Wahana/Aktivitas
+     */
+    public function showWahana(\App\Models\Wahana $wahana)
+    {
+        $otherWahanas = \App\Models\Wahana::where('id', '!=', $wahana->id)->latest()->take(3)->get();
+        return view('wahana.show', compact('wahana', 'otherWahanas'));
+    }
 }
+

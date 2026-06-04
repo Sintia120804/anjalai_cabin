@@ -81,6 +81,6 @@
 
 <div class="mt-4 alert alert-info bg-opacity-10 border-info border-opacity-10 rounded-4">
     <h6 class="fw-bold text-info"><i class="bi bi-info-circle-fill me-2"></i>Informasi</h6>
-    <p class="small text-muted mb-0">Reservasi Manual digunakan untuk mencatat tamu yang memesan langsung di tempat (Walk-in). Sistem akan otomatis memblokir tanggal ini dari pemesanan online.</p>
+    <p class="small text-muted mb-0">Reservasi Manual digunakan untuk mencatat tamu yang memesan langsung di tempat. Sistem akan otomatis memblokir tanggal ini dari pemesanan online.</p>
 </div>
 @endsection

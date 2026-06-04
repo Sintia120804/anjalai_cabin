@@ -268,7 +268,7 @@
                         <p class="mb-4">Eksplorasi ketenangan alam tropis dengan fasilitas modern. Kami berkomitmen
                             memberikan pengalaman menginap tak terlupakan untuk Anda dan keluarga.</p>
                         <div class="d-flex gap-3">
-                            <a href="https://wa.me/6281266880007" target="_blank" class="footer-link fs-4"><i
+                            <a href="https://wa.me/6285161248112" target="_blank" class="footer-link fs-4"><i
                                     class="bi bi-whatsapp"></i></a>
                             <a href="#" class="footer-link fs-4"><i class="bi bi-instagram"></i></a>
                             <a href="#" class="footer-link fs-4"><i class="bi bi-tiktok"></i></a>
@@ -287,8 +287,8 @@
                             <li class="mb-2"><i class="bi bi-geo-alt me-2 text-primary"></i> <span class="small">Taluak
                                     anjalai, Kec. Lembah Gumanti, Kabupaten Solok, Sumatera Barat 27371</span></li>
                             <li class="mb-2"><i class="bi bi-whatsapp me-2 text-success"></i> <a
-                                    href="https://wa.me/6281266880007" target="_blank"
-                                    class="footer-link">0812-6688-0007</a></li>
+                                    href="https://wa.me/6285161248112" target="_blank"
+                                    class="footer-link">0851-6124-8112</a></li>
                             <li class="mb-3"><a
                                     href="https://www.google.com/maps/place/Anjalai+Nature+Cabin/@-1.092301,100.7396474,14z"
                                     target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-2">Buka
@@ -333,7 +333,7 @@
             });
         </script>
     @endif
-    <a href="https://wa.me/6281266880007?text=Halo%20Admin%20Anjalai,%20saya%20ingin%20bertanya%20tentang%20reservasi%20cabin..." 
+    <a href="https://wa.me/6285161248112?text=Halo%20Admin%20Anjalai,%20saya%20ingin%20bertanya%20tentang%20reservasi%20cabin..." 
        class="whatsapp-float" target="_blank" title="Chat via WhatsApp">
         <i class="bi bi-whatsapp"></i>
     </a>

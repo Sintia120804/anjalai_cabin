@@ -19,36 +19,60 @@ class BookingManualController extends Controller
 
     public function create()
     {
-        $cabins = Cabin::where('status', 'tersedia')->get();
-
-        // Ambil semua tanggal yang sudah dipesan (Online)
-        $onlineBookings = Booking::where('status_booking', '!=', 'ditolak')
-            ->where('tanggal_checkout', '>=', now()->toDateString())
-            ->get(['cabin_id', 'tanggal_checkin', 'tanggal_checkout']);
-
-        // Ambil semua tanggal yang sudah dipesan (Manual)
-        $manualBookings = BookingManual::where('tanggal_checkout', '>=', now()->toDateString())
-            ->get(['cabin_id', 'tanggal_checkin', 'tanggal_checkout']);
-
+        $cabins = Cabin::all();
         $bookedDates = [];
 
-        foreach ($onlineBookings as $b) {
-            $bookedDates[$b->cabin_id][] = [
-                'from' => $b->tanggal_checkin,
-                'to' => $b->tanggal_checkout
-            ];
+        foreach ($cabins as $cabin) {
+            $totalUnits = $cabin->units()->where('status', 'available')->count();
+            $disabledDates = [];
+
+            if ($totalUnits > 0) {
+                // Online bookings
+                $onlineBookings = Booking::where('cabin_id', $cabin->id)
+                    ->where('status_booking', '!=', 'ditolak')
+                    ->where('tanggal_checkout', '>=', now()->toDateString())
+                    ->get(['tanggal_checkin', 'tanggal_checkout']);
+
+                // Manual bookings
+                $manualBookings = BookingManual::where('cabin_id', $cabin->id)
+                    ->where('status_booking', '!=', 'cancelled')
+                    ->where('tanggal_checkout', '>=', now()->toDateString())
+                    ->get(['tanggal_checkin', 'tanggal_checkout']);
+
+                $allBookings = $onlineBookings->concat($manualBookings);
+                $dateCounts = [];
+
+                foreach ($allBookings as $booking) {
+                    $start = Carbon::parse($booking->tanggal_checkin)->startOfDay();
+                    $end = Carbon::parse($booking->tanggal_checkout)->startOfDay();
+
+                    while ($start->lt($end)) {
+                        $dateStr = $start->format('Y-m-d');
+                        if (!isset($dateCounts[$dateStr])) {
+                            $dateCounts[$dateStr] = 0;
+                        }
+                        $dateCounts[$dateStr]++;
+                        $start->addDay();
+                    }
+                }
+
+                foreach ($dateCounts as $date => $count) {
+                    if ($count >= $totalUnits) {
+                        $disabledDates[] = $date;
+                    }
+                }
+            } else {
+                // No units available: block all dates
+                $disabledDates[] = [
+                    'from' => now()->format('Y-m-d'),
+                    'to' => now()->addYears(10)->format('Y-m-d')
+                ];
+            }
+
+            $bookedDates[$cabin->id] = $disabledDates;
         }
 
-        foreach ($manualBookings as $b) {
-            $bookedDates[$b->cabin_id][] = [
-                'from' => $b->tanggal_checkin,
-                'to' => $b->tanggal_checkout
-            ];
-        }
-
-        $cabins = Cabin::all(); // Get all cabins to pass pricing data
- 
-         return view('admin.booking_manual.create', compact('cabins', 'bookedDates'));
+        return view('admin.booking_manual.create', compact('cabins', 'bookedDates'));
     }
 
     public function store(Request $request)
@@ -125,7 +149,7 @@ class BookingManualController extends Controller
         }
 
         BookingManual::create([
-            'admin_id' => auth()->id(),
+            'admin_id' => auth()->user()->id,
             'cabin_id' => $cabin->id,
             'cabin_unit_id' => $availableUnit->id,
             'nama_pengunjung' => $request->nama_pengunjung,

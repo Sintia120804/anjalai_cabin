@@ -36,6 +36,10 @@ class CartController extends Controller
             'jumlah_tamu' => 'required|integer|min:1'
         ]);
 
+        if ($request->jumlah_tamu > $cabin->kapasitas) {
+            return back()->with('error', 'Jumlah tamu melebihi kapasitas kabin (maksimal ' . $cabin->kapasitas . ' orang).');
+        }
+
         $dates = explode(' to ', $request->dates);
         if (count($dates) !== 2) {
             return back()->with('error', 'Silakan pilih rentang tanggal (Check-In dan Check-Out) di kalender.');
@@ -73,8 +77,25 @@ class CartController extends Controller
         
         $availableCount = $availableUnits->whereNotIn('id', $allBookedUnitIds)->count();
 
-        if ($jumlah_kamar < 1 || $availableCount < $jumlah_kamar) {
-            return back()->with('error', 'Maaf, hanya tersisa ' . $availableCount . ' kamar pada tanggal tersebut. Jumlah yang Anda minta (' . $jumlah_kamar . ') melebihi ketersediaan.');
+        // Hitung kamar yang sudah ada di keranjang untuk kabin dan tanggal yang overlap
+        $cart = session()->get('cart', []);
+        $kamarDiKeranjang = 0;
+        foreach ($cart as $item) {
+            if ($item['cabin_id'] == $cabin->id) {
+                $itemCheckin = Carbon::parse($item['tanggal_checkin']);
+                $itemCheckout = Carbon::parse($item['tanggal_checkout']);
+                
+                // Cek overlap
+                if ($tanggal_checkin->lt($itemCheckout) && $tanggal_checkout->gt($itemCheckin)) {
+                    $kamarDiKeranjang += $item['jumlah_kamar'];
+                }
+            }
+        }
+
+        $sisaKamar = $availableCount - $kamarDiKeranjang;
+
+        if ($jumlah_kamar < 1 || $sisaKamar < $jumlah_kamar) {
+            return back()->with('error', 'Maaf, hanya tersisa ' . max(0, $sisaKamar) . ' kamar lagi pada tanggal tersebut (termasuk ' . $kamarDiKeranjang . ' kamar di keranjang Anda). Jumlah yang Anda minta (' . $jumlah_kamar . ') melebihi ketersediaan.');
         }
 
         // Kalkulasi Harga (Per Kamar)
@@ -112,23 +133,41 @@ class CartController extends Controller
         // total_harga = harga malam × jumlah malam (Fasilitas ditiadakan)
         $totalHargaPerKamar = $totalHargaBase;
 
-        $cart = session()->get('cart', []);
-        $cartId = uniqid();
+        // Cek apakah item yang sama persis sudah ada di keranjang
+        $existingCartId = null;
+        foreach ($cart as $key => $item) {
+            if ($item['cabin_id'] == $cabin->id && 
+                $item['tanggal_checkin'] == $tanggal_checkin->format('Y-m-d H:i:s') && 
+                $item['tanggal_checkout'] == $tanggal_checkout->format('Y-m-d H:i:s') &&
+                $item['is_couple'] == $isCouple) {
+                $existingCartId = $key;
+                break;
+            }
+        }
 
-        $cart[$cartId] = [
-            'id' => $cartId,
-            'cabin_id' => $cabin->id,
-            'cabin_name' => $cabin->name_cabin,
-            'foto' => $cabin->galeris->first()->foto ?? null,
-            'tanggal_checkin' => $tanggal_checkin->format('Y-m-d H:i:s'),
-            'tanggal_checkout' => $tanggal_checkout->format('Y-m-d H:i:s'),
-            'jumlah_kamar' => $jumlah_kamar,
-            'jumlah_tamu' => $request->jumlah_tamu,
-            'is_couple' => $isCouple,
-            'fasilitas_tambahan' => $fasilitasTambahanJson,
-            'total_harga_fasilitas' => $totalHargaFasilitas,
-            'total_harga' => $totalHargaPerKamar,
-        ];
+        if ($existingCartId) {
+            // Jika ada, tambahkan jumlah kamar dan update total harga
+            $cart[$existingCartId]['jumlah_kamar'] += $jumlah_kamar;
+            $cart[$existingCartId]['total_harga'] = $totalHargaPerKamar * $cart[$existingCartId]['jumlah_kamar'];
+        } else {
+            // Jika belum ada, buat item baru
+            $cartId = uniqid();
+            $cart[$cartId] = [
+                'id' => $cartId,
+                'cabin_id' => $cabin->id,
+                'cabin_name' => $cabin->name_cabin,
+                'foto' => $cabin->galeris->first()->foto ?? null,
+                'tanggal_checkin' => $tanggal_checkin->format('Y-m-d H:i:s'),
+                'tanggal_checkout' => $tanggal_checkout->format('Y-m-d H:i:s'),
+                'jumlah_kamar' => $jumlah_kamar,
+                'jumlah_tamu' => $request->jumlah_tamu,
+                'is_couple' => $isCouple,
+                'fasilitas_tambahan' => $fasilitasTambahanJson,
+                'total_harga_fasilitas' => $totalHargaFasilitas,
+                'harga_per_kamar' => $totalHargaPerKamar, // simpan harga per kamar untuk kalkulasi ulang
+                'total_harga' => $totalHargaPerKamar * $jumlah_kamar,
+            ];
+        }
 
         session()->put('cart', $cart);
 
@@ -182,10 +221,29 @@ class CartController extends Controller
 
             $availableCount = $allUnits->whereNotIn('id', array_unique(array_merge($bookedOnlineIds, $bookedManualIds)))->count();
 
-            if ($current >= $availableCount) {
-                return back()->with('error', 'Maaf, kamar yang tersedia pada tanggal ini hanya ' . $availableCount . ' unit.');
+            // Hitung kamar yang sudah ada di keranjang untuk kabin dan tanggal yang overlap (kecuali item ini sendiri)
+            $kamarDiKeranjang = 0;
+            foreach ($cart as $cartItemId => $item) {
+                if ($cartItemId != $id && $item['cabin_id'] == $cabin->id) {
+                    $itemCheckin = Carbon::parse($item['tanggal_checkin']);
+                    $itemCheckout = Carbon::parse($item['tanggal_checkout']);
+                    
+                    if ($tanggal_checkin->lt($itemCheckout) && $tanggal_checkout->gt($itemCheckin)) {
+                        $kamarDiKeranjang += $item['jumlah_kamar'];
+                    }
+                }
+            }
+
+            $sisaKamar = $availableCount - $kamarDiKeranjang;
+
+            if ($current >= $sisaKamar) {
+                return back()->with('error', 'Maaf, kamar yang tersisa pada tanggal ini hanya ' . max(0, $sisaKamar) . ' unit (di luar keranjang Anda).');
             }
             $cart[$id]['jumlah_kamar'] = $current + 1;
+            
+            // Update total harga
+            $hargaPerKamar = $cart[$id]['harga_per_kamar'] ?? ($cart[$id]['total_harga'] / $current); // fallback jika harga_per_kamar belum tersimpan
+            $cart[$id]['total_harga'] = $hargaPerKamar * $cart[$id]['jumlah_kamar'];
 
         } elseif ($action === 'decrease') {
             if ($current <= 1) {
@@ -195,6 +253,10 @@ class CartController extends Controller
                 return back()->with('success', 'Item dihapus dari keranjang.');
             }
             $cart[$id]['jumlah_kamar'] = $current - 1;
+            
+            // Update total harga
+            $hargaPerKamar = $cart[$id]['harga_per_kamar'] ?? ($cart[$id]['total_harga'] / $current); // fallback jika harga_per_kamar belum tersimpan
+            $cart[$id]['total_harga'] = $hargaPerKamar * $cart[$id]['jumlah_kamar'];
         }
 
         session()->put('cart', $cart);
@@ -244,6 +306,8 @@ class CartController extends Controller
                 return back()->with('error', 'Maaf, ' . $cabin->name_cabin . ' tidak lagi memiliki ' . $jumlah_kamar . ' kamar pada tanggal yang dipilih. Silakan hapus atau ubah item di keranjang.');
             }
 
+            $hargaPerKamar = $item['harga_per_kamar'] ?? ($item['total_harga'] / $jumlah_kamar);
+
             // Create bookings per room
             foreach ($availableUnitIds as $unitId) {
                 Booking::create([
@@ -256,12 +320,12 @@ class CartController extends Controller
                     'jumlah_tamu' => $item['jumlah_tamu'],
                     'is_couple' => $item['is_couple'],
                     'fasilitas_tambahan' => $item['fasilitas_tambahan'],
-                    'total_harga_fasilitas' => $item['total_harga_fasilitas'],
-                    'total_harga' => $item['total_harga'],
+                    'total_harga_fasilitas' => $item['total_harga_fasilitas'] ?? 0,
+                    'total_harga' => $hargaPerKamar,
                     'status_booking' => 'pending'
                 ]);
-                $grandTotal += $item['total_harga'];
             }
+            $grandTotal += $item['total_harga'];
         }
 
         // Create 1 Pembayaran for the Order

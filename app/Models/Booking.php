@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
+    // protected $table = 'bookings';
     protected $fillable = [
         'order_id',
         'user_id',
-        'cabin_id',
+        'cabin_id', 
         'cabin_unit_id',
         'tanggal_checkin',
         'tanggal_checkout',

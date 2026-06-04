@@ -81,51 +81,32 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-medium">Fasilitas Cabin</label>
-                        <div id="facilities-container">
-                            @if($cabin->fasilitas && count($cabin->fasilitas) > 0)
-                                @foreach($cabin->fasilitas as $item)
-                                    <div class="input-group mb-2 facility-item">
-                                        <input type="text" name="fasilitas[]" class="form-control" value="{{ $item }}" placeholder="Contoh: Sarapan">
-                                        <button type="button" class="btn btn-outline-danger remove-facility">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="input-group mb-2 facility-item">
-                                    <input type="text" name="fasilitas[]" class="form-control" placeholder="Contoh: Sarapan">
-                                    <button type="button" class="btn btn-outline-danger remove-facility">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-1" id="add-facility">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Fasilitas
-                        </button>
+                        <label class="form-label fw-medium">Fasilitas Cabin <span class="text-danger">*</span></label>
+                        @php
+                            $defaultFasilitas = [
+                                'Sarapan', 
+                                'Balcone', 
+                                'Water Heater', 
+                                'Water Dispenser', 
+                                'Teh dan Kopi', 
+                                'Peralatan Mandi', 
+                                'Tempat BBQ (belum termasuk gas dan arang)', 
+                                'Tempat api unggun'
+                            ];
+                            $currentFasilitas = $cabin->fasilitas ?? [];
+                            // Gabungkan default dengan yang sudah ada di database (untuk tag kustom lama)
+                            $allFasilitas = array_unique(array_merge($defaultFasilitas, $currentFasilitas));
+                        @endphp
+                        <select name="fasilitas[]" class="form-select choices-fasilitas @error('fasilitas') is-invalid @enderror" multiple required data-placeholder="Pilih atau ketik fasilitas baru...">
+                            @foreach($allFasilitas as $item)
+                                <option value="{{ $item }}" {{ in_array($item, $currentFasilitas) ? 'selected' : '' }}>{{ $item }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Bisa pilih dari daftar atau ketik sendiri lalu tekan Enter.</div>
+                        @error('fasilitas')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-
-                    <script>
-                        document.getElementById('add-facility').addEventListener('click', function() {
-                            const container = document.getElementById('facilities-container');
-                            const newItem = document.createElement('div');
-                            newItem.className = 'input-group mb-2 facility-item';
-                            newItem.innerHTML = `
-                                <input type="text" name="fasilitas[]" class="form-control" placeholder="Contoh: Sarapan">
-                                <button type="button" class="btn btn-outline-danger remove-facility">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            `;
-                            container.appendChild(newItem);
-                        });
-
-                        document.addEventListener('click', function(e) {
-                            if (e.target.closest('.remove-facility')) {
-                                e.target.closest('.facility-item').remove();
-                            }
-                        });
-                    </script>
 
                     <hr class="text-muted border-secondary opacity-25">
 
@@ -168,3 +149,42 @@
 </div>
 
 @endsection
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <style>
+        .choices__inner {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            min-height: 44px;
+        }
+        .choices[data-type*="select-multiple"] .choices__button, .choices[data-type*="text"] .choices__button {
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+            margin-left: 5px;
+        }
+        .choices__list--multiple .choices__item {
+            background-color: #0d6efd;
+            border: 1px solid #0d6efd;
+            border-radius: 4px;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var element = document.querySelector('.choices-fasilitas');
+            if (element) {
+                new Choices(element, {
+                    removeItemButton: true,
+                    placeholder: true,
+                    placeholderValue: 'Pilih atau ketik fasilitas baru...',
+                    searchPlaceholderValue: 'Cari fasilitas...',
+                    itemSelectText: 'Klik untuk memilih'
+                });
+            }
+        });
+    </script>
+@endpush
