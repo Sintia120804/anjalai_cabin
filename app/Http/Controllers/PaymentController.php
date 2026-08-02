@@ -101,7 +101,7 @@ class PaymentController extends Controller
     {
         $serverKey = config('midtrans.server_key');
         $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
-        
+
         if ($hashed !== $request->signature_key) {
             return response()->json(['message' => 'Invalid signature'], 403);
         }
@@ -159,6 +159,7 @@ class PaymentController extends Controller
         if ($pembayaran->status_pembayaran === 'ditolak') {
             if ($pembayaran->order_id) {
                 Booking::where('order_id', $pembayaran->order_id)->update(['status_booking' => 'ditolak']);
+                \App\Models\BookingWahana::where('order_id', $pembayaran->order_id)->update(['status_booking' => 'ditolak']);
             } else {
                 Booking::where('id', $pembayaran->booking_id)->update(['status_booking' => 'ditolak']);
             }
@@ -194,7 +195,7 @@ class PaymentController extends Controller
         }
 
         $pembayaran = Pembayaran::where('order_id', $baseOrderId)->first();
-        
+
         if (!$pembayaran && str_starts_with($baseOrderId, 'BKG-')) {
             $bookingId = (int) str_replace('BKG-', '', $baseOrderId);
             $pembayaran = Pembayaran::where('booking_id', $bookingId)->first();

@@ -189,6 +189,86 @@ class UserBookingController extends Controller
         return redirect()->route('user.dashboard')->with('success', 'Reservasi berhasil dibuat! Silakan lakukan pembayaran agar pesanan tidak dibatalkan.');
     }
 
+    public function reschedule(Request $request, $orderId)
+    {
+        $request->validate([
+            'new_checkin' => 'required|date|after_or_equal:today',
+        ]);
+
+        $orderBookings = Booking::where('user_id', Auth::id())
+            ->where(function($query) use ($orderId) {
+                $query->where('order_id', $orderId)
+                      ->orWhere('id', str_replace('BKG-', '', $orderId));
+            })->get();
+
+        if ($orderBookings->isEmpty()) {
+            return back()->with('error', 'Pesanan tidak ditemukan.');
+        }
+
+        $firstBooking = $orderBookings->first();
+        
+        // Cek syarat H-14
+        if (Carbon::now()->addDays(14)->gt(Carbon::parse($firstBooking->tanggal_checkin))) {
+            return back()->with('error', 'Reschedule maksimal dilakukan H-14 sebelum tanggal Check-In.');
+        }
+        
+        if ($firstBooking->reschedule_count > 0) {
+            return back()->with('error', 'Pesanan ini sudah pernah di-reschedule.');
+        }
+
+        $oldCheckin = Carbon::parse($firstBooking->tanggal_checkin);
+        $oldCheckout = Carbon::parse($firstBooking->tanggal_checkout);
+        $durationHours = $oldCheckin->diffInHours($oldCheckout);
+
+        $newCheckin = Carbon::parse($request->new_checkin)->setTime($oldCheckin->hour, $oldCheckin->minute, $oldCheckin->second);
+        $newCheckout = clone $newCheckin;
+        $newCheckout->addHours($durationHours);
+
+        $bookingsGrouped = $orderBookings->groupBy('cabin_id');
+        
+        foreach ($bookingsGrouped as $cabinId => $bGroup) {
+            $cabin = Cabin::find($cabinId);
+            $neededUnitsCount = $bGroup->count();
+
+            $bookedOnlineUnitIds = Booking::where('cabin_id', $cabin->id)
+                ->where('status_booking', '!=', 'ditolak')
+                ->whereNotIn('id', $bGroup->pluck('id'))
+                ->where('tanggal_checkin', '<', $newCheckout)
+                ->where('tanggal_checkout', '>', $newCheckin)
+                ->whereNotNull('cabin_unit_id')
+                ->pluck('cabin_unit_id')
+                ->toArray();
+
+            $bookedManualUnitIds = \App\Models\BookingManual::where('cabin_id', $cabin->id)
+                ->where('status_booking', '!=', 'cancelled')
+                ->where('tanggal_checkin', '<', $newCheckout)
+                ->where('tanggal_checkout', '>', $newCheckin)
+                ->whereNotNull('cabin_unit_id')
+                ->pluck('cabin_unit_id')
+                ->toArray();
+
+            $allBookedUnitIds = array_unique(array_merge($bookedOnlineUnitIds, $bookedManualUnitIds));
+            
+            $availableUnits = $cabin->units()->where('status', 'available')->whereNotIn('id', $allBookedUnitIds)->get();
+            
+            if ($availableUnits->count() < $neededUnitsCount) {
+                return back()->with('error', 'Kamar ' . $cabin->name_cabin . ' sudah penuh pada tanggal yang baru. Silakan pilih tanggal lain.');
+            }
+
+            $unitIndex = 0;
+            foreach ($bGroup as $booking) {
+                $booking->tanggal_checkin = $newCheckin->format('Y-m-d H:i:s');
+                $booking->tanggal_checkout = $newCheckout->format('Y-m-d H:i:s');
+                $booking->cabin_unit_id = $availableUnits[$unitIndex]->id;
+                $booking->reschedule_count = 1;
+                $booking->save();
+                $unitIndex++;
+            }
+        }
+
+        return back()->with('success', 'Berhasil! Jadwal pemesanan Anda telah diubah ke ' . $newCheckin->format('d M Y') . '.');
+    }
+
     public function destroy(Booking $booking)
     {
         // Ensure only the owner can delete, and only if it's pending
@@ -238,5 +318,34 @@ class UserBookingController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.booking_pdf', compact('orderBookings', 'firstBooking', 'pembayaran', 'grandTotal', 'orderId'));
         
         return $pdf->download('Bukti-Booking-' . $orderId . '.pdf');
+    }
+    public function storeUlasan(Request $request)
+    {
+        $request->validate([
+            'booking_id' => 'required|exists:bookings,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'komentar' => 'required|string|max:1000',
+        ]);
+
+        $booking = Booking::where('id', $request->booking_id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Check if user already reviewed this booking
+        $existing = \App\Models\Ulasan::where('booking_id', $booking->id)->first();
+        if ($existing) {
+            return back()->with('error', 'Anda sudah memberikan ulasan untuk pesanan ini.');
+        }
+
+        \App\Models\Ulasan::create([
+            'user_id' => Auth::id(),
+            'cabin_id' => $booking->cabin_id,
+            'booking_id' => $booking->id,
+            'rating' => $request->rating,
+            'komentar' => $request->komentar,
+            'is_tampil' => 1
+        ]);
+
+        return back()->with('success', 'Terima kasih! Ulasan Anda berhasil disimpan.');
     }
 }

@@ -263,13 +263,15 @@ class CartController extends Controller
         return back()->with('success', 'Jumlah kamar berhasil diperbarui.');
     }
 
-    public function checkout()
+    public function checkout(Request $request)
     {
         $cart = session()->get('cart');
         
         if (!$cart || count($cart) == 0) {
             return redirect()->route('welcome')->with('error', 'Keranjang Anda kosong.');
         }
+
+        $jenis_pembayaran = $request->input('jenis_pembayaran', 'lunas');
 
         $orderId = 'ORD-' . date('md') . rand(10, 99);
         $grandTotal = 0;
@@ -307,6 +309,11 @@ class CartController extends Controller
             }
 
             $hargaPerKamar = $item['harga_per_kamar'] ?? ($item['total_harga'] / $jumlah_kamar);
+            
+            $sisa_pembayaran = 0;
+            if ($jenis_pembayaran === 'dp') {
+                $sisa_pembayaran = $hargaPerKamar / 2;
+            }
 
             // Create bookings per room
             foreach ($availableUnitIds as $unitId) {
@@ -322,11 +329,15 @@ class CartController extends Controller
                     'fasilitas_tambahan' => $item['fasilitas_tambahan'],
                     'total_harga_fasilitas' => $item['total_harga_fasilitas'] ?? 0,
                     'total_harga' => $hargaPerKamar,
+                    'jenis_pembayaran' => $jenis_pembayaran,
+                    'sisa_pembayaran' => $sisa_pembayaran,
                     'status_booking' => 'pending'
                 ]);
             }
             $grandTotal += $item['total_harga'];
         }
+
+        $bayarSekarang = $jenis_pembayaran === 'dp' ? ($grandTotal / 2) : $grandTotal;
 
         // Create 1 Pembayaran for the Order
         Pembayaran::create([
@@ -334,7 +345,7 @@ class CartController extends Controller
             'booking_id' => null, // We group by order_id now
             'metode_pembayaran' => null,
             'tanggal_pembayaran' => null,
-            'jumlah_bayar' => $grandTotal,
+            'jumlah_bayar' => $bayarSekarang,
             'bukti_pembayaran' => null,
             'status_pembayaran' => 'pending'
         ]);

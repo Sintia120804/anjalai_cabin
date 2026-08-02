@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cabin_units', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cabin_id')->constrained('cabins')->onDelete('cascade');
-            $table->string('unit_name'); 
+            $table->string('unit_name', 25); 
             $table->enum('status', ['available', 'maintenance'])->default('available');
             $table->timestamps();
         });

@@ -73,6 +73,59 @@
                                 </div>
                             @endif
                         </div>
+
+                        <hr class="my-5 opacity-10">
+                        
+                        <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-text text-primary me-2"></i>Syarat & Ketentuan Menginap</h5>
+                        <div class="bg-light p-4 rounded-4 border mb-5 shadow-sm">
+                            <ul class="text-muted small mb-0 lh-lg" style="text-align: justify; padding-left: 1.5rem;">
+                                <li>Apabila melebihi kapasitas yang telah ditentukan akan dikenakan denda <strong>Rp.185.000,-/orang</strong> extrabed dan sarapan.</li>
+                                <li>Apabila sudah melakukan DP uang <strong>tidak bisa di refund</strong>.</li>
+                                <li>Reschedule dapat dilakukan 1 kali maksimal <strong>H-14 sebelum tanggal check in</strong>, lebih dari satu kali pembayaran yang telah dibayarkan dianggap hangus.</li>
+                                <li>Villa ini <strong>tidak menerima pasangan non-menikah</strong>. Pasangan yang menikah harus memiliki dan memperlihatkan identitas diri seperti KTP Suami-Istri / Fotokopi buku nikah/foto-foto pernikahan pada saat check in.</li>
+                                <li><strong>Tidak dibenarkan</strong> membawa hewan peliharaan.</li>
+                                <li>Tamu yang berusia <strong>6 tahun ke atas</strong> dianggap sebagai dewasa dan dikenakan tarif penuh.</li>
+                                <li><strong>Check in</strong> 14.00 - 23:00 WIB.</li>
+                                <li><strong>Check out</strong> 11.00 WIB.</li>
+                                <li>DP artinya <strong>setuju dengan syarat dan ketentuan</strong>.</li>
+                                <li>Pembayaran uang muka (DP) <strong>minimal 50%</strong>. Pembayaran melalui transfer rekening. Sertakan bukti transfer dan foto KTP.</li>
+                                <li>Batas reservasi sampai jam <strong>10 pagi, besok</strong>, jika melewati batas tersebut, reservasi akan <strong>tercancel otomatis</strong> dari sistem kami.</li>
+                            </ul>
+                        </div>
+
+                        <hr class="my-5 opacity-10">
+                        <h5 class="fw-bold mb-4">Ulasan Pengunjung</h5>
+                        @php
+                            $ulasans = \App\Models\Ulasan::where('cabin_id', $cabin->id)->where('is_tampil', 1)->latest()->get();
+                        @endphp
+                        @forelse($ulasans as $ulasan)
+                            <div class="d-flex mb-4">
+                                <div class="me-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold text-uppercase shadow-sm" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                                        {{ substr($ulasan->user->name ?? 'A', 0, 1) }}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="fw-bold mb-0 text-dark">{{ $ulasan->user->name ?? 'Anonim' }}</h6>
+                                        <span class="small text-muted">{{ $ulasan->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <div class="mb-2 text-warning">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="bi {{ $i <= $ulasan->rating ? 'bi-star-fill' : 'bi-star' }}"></i>
+                                        @endfor
+                                    </div>
+                                    <p class="text-muted small mb-0 lh-lg bg-light p-3 rounded-4 border border-light shadow-sm">
+                                        "{{ $ulasan->komentar }}"
+                                    </p>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-4 bg-light rounded-4 border-dashed border-light">
+                                <i class="bi bi-chat-square-text text-muted fs-2 mb-2 d-block opacity-50"></i>
+                                <p class="text-muted small mb-0">Belum ada ulasan untuk cabin ini.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -85,8 +138,6 @@
                                 <h4 class="fw-bold mb-1">{{ $cabin->name_cabin }}</h4>
                                 <div class="small">
                                     <span class="text-primary fw-bold"><i class="bi bi-people-fill"></i> {{ $cabin->kapasitas }} Orang</span>
-                                    <span id="availabilityBadge" class="text-warning text-dark fw-bold ms-2"><i class="bi bi-door-open-fill"></i> Tersedia {{ $sisaKamar }} Kamar</span>
-                                    <span class="text-success fw-bold ms-2"><i class="bi bi-check-circle-fill"></i> Bisa Dipesan</span>
                                 </div>
                             </div>
                             <div class="text-end">
@@ -174,6 +225,10 @@
                                 {{-- Preview Harga --}}
                                 <div id="pricePreview" class="p-3 bg-light rounded-4 mb-4 d-none">
                                     <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted small">Ketersediaan Kamar</span>
+                                        <span id="previewAvailable" class="fw-bold text-success small">-</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
                                         <span class="text-muted small">Estimasi per kamar</span>
                                         <span id="previewNights" class="fw-bold text-dark small">0 Malam</span>
                                     </div>
@@ -256,7 +311,7 @@
 
                         {{-- Jumlah Kamar --}}
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Total Kamar</label>
+                            <label class="form-label fw-bold">Total Kamar <span class="fw-normal small ms-1 text-muted">(Apakah mau menambah kamar?)</span></label>
                             <div class="input-group input-group-lg">
                                 <button type="button" class="btn btn-outline-secondary rounded-start-3" id="btnMinus">
                                     <i class="bi bi-dash-lg"></i>
@@ -281,6 +336,16 @@
                                 <span class="fw-bold">Estimasi Total</span>
                                 <span class="fw-bold text-primary fs-5" id="summaryTotal">Rp 0</span>
                             </div>
+                        </div>
+                    </div>
+                    
+                    {{-- Syarat dan Ketentuan Checkbox --}}
+                    <div class="px-4 pb-3">
+                        <div class="form-check bg-warning bg-opacity-10 border border-warning border-opacity-50 p-3 rounded-4 d-flex align-items-center">
+                            <input class="form-check-input mt-0 me-3 shadow-sm" type="checkbox" id="termsCheckbox" required style="width: 1.5rem; height: 1.5rem; cursor: pointer;">
+                            <label class="form-check-label small fw-medium text-dark" for="termsCheckbox" style="cursor: pointer;">
+                                Saya telah membaca dan menyetujui <a href="#" onclick="document.querySelector('.modal-header .btn-close').click(); document.querySelector('.bg-light.p-4.rounded-4.border.mb-5.shadow-sm').scrollIntoView({behavior: 'smooth', block: 'center'}); return false;" class="text-primary text-decoration-none fw-bold">Syarat & Ketentuan</a> menginap di Anjalai Cabin.
+                            </label>
                         </div>
                     </div>
 
@@ -386,6 +451,8 @@
                         .then(data => {
                             const badge = document.getElementById('availabilityBadge');
                             if(badge) badge.innerHTML = `<i class="bi bi-door-open-fill"></i> Tersedia ${data.available} Kamar`;
+                            const prevAvail = document.getElementById('previewAvailable');
+                            if(prevAvail) prevAvail.innerText = `Tersedia ${data.available} Kamar`;
                         });
                 } else {
                     basePricePerKamar = 0;

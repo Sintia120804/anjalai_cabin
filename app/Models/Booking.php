@@ -19,7 +19,10 @@ class Booking extends Model
         'fasilitas_tambahan',
         'total_harga_fasilitas',
         'total_harga',
-        'status_booking'
+        'jenis_pembayaran',
+        'sisa_pembayaran',
+        'status_booking',
+        'reschedule_count'
     ];
 
     public function user()

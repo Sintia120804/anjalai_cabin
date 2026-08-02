@@ -141,7 +141,12 @@
                         <td class="label">Status Pembayaran</td>
                         <td>:
                             @if($pembayaran && $pembayaran->status_pembayaran === 'diterima')
-                                <span class="status status-lunas">LUNAS</span>
+                                @if($firstBooking->jenis_pembayaran == 'dp' && $firstBooking->sisa_pembayaran > 0)
+                                    <span class="status" style="background-color: #fef08a; color: #854d0e;">DP 50%
+                                        DIBAYAR</span>
+                                @else
+                                    <span class="status status-lunas">LUNAS</span>
+                                @endif
                             @elseif($pembayaran && $pembayaran->status_pembayaran === 'menunggu_konfirmasi')
                                 <span class="status status-pending">MENUNGGU VERIFIKASI</span>
                             @elseif($pembayaran && $pembayaran->status_pembayaran === 'ditolak')
@@ -226,18 +231,43 @@
                 </tr>
             @endforeach
             <tr class="total-row">
-                <td colspan="5" style="text-align: right;">TOTAL BAYAR</td>
+                <td colspan="5" style="text-align: right;">TOTAL BAYAR (SEKARANG)</td>
                 <td style="text-align: right; color: #2563eb;">Rp
                     {{ number_format($pembayaran->jumlah_bayar ?? $grandTotal, 0, ',', '.') }}
                 </td>
             </tr>
+            @if($firstBooking->jenis_pembayaran == 'dp' && $orderBookings->sum('sisa_pembayaran') > 0)
+                <tr class="total-row" style="background-color: #fffbeb;">
+                    <td colspan="5" style="text-align: right; color: #b45309;">SISA PELUNASAN (SAAT CHECK-IN)</td>
+                    <td style="text-align: right; color: #b45309;">Rp
+                        {{ number_format($orderBookings->sum('sisa_pembayaran'), 0, ',', '.') }}
+                    </td>
+                </tr>
+            @endif
         </tbody>
     </table>
 
+    <div style="margin-top: 30px; border: 1px solid #cbd5e1; padding: 15px; background-color: #f8fafc;">
+        <h3 style="font-size: 12px; margin-top: 0; color: #2563eb; margin-bottom: 8px; text-transform: uppercase;">
+            Penting: Syarat & Ketentuan Menginap</h3>
+        <ul style="margin: 0; padding-left: 15px; font-size: 9px; color: #475569; line-height: 1.4;">
+            <li><strong>Waktu Menginap:</strong> Check-in mulai pukul 14.00 - 23.00 WIB. Check-out maksimal pukul 11.00
+                WIB.</li>
+            <li><strong>Kapasitas & Tambahan Tamu:</strong> Tamu usia 6 th ke atas dihitung dewasa. Jika melebihi
+                kapasitas kabin, dikenakan denda/biaya tambahan <strong>Rp 185.000/orang</strong> (sudah termasuk
+                extrabed & sarapan).</li>
+            <li><strong>Pasangan:</strong> Kami hanya menerima pasangan menikah. Wajib menunjukkan identitas (KTP
+                Suami-Istri / Fotokopi Buku Nikah) saat check-in.</li>
+            <li><strong>Kebijakan Refund & Reschedule:</strong> Pembayaran/DP yang sudah masuk <strong>tidak bisa
+                    direfund</strong>. Reschedule hanya bisa 1x (maksimal H-14 sebelum check-in).</li>
+            <li><strong>Hewan Peliharaan:</strong> Tidak diperkenankan membawa hewan peliharaan ke dalam area kabin.
+            </li>
+        </ul>
+    </div>
+
     <div class="footer">
-        <p>Dokumen ini adalah bukti pembayaran yang sah dan diterbitkan secara otomatis oleh sistem Anjalai Nature
-            Cabin.</p>
-        <p>Silakan tunjukkan bukti ini saat proses check-in di resepsionis.</p>
+        <p>Dokumen ini adalah e-Tiket / bukti reservasi yang sah diterbitkan oleh sistem Anjalai Nature Cabin.</p>
+        <p>Silakan tunjukkan bukti ini beserta kartu identitas Anda saat proses check-in di resepsionis.</p>
         <p style="margin-top: 15px;">Dicetak pada: {{ \Carbon\Carbon::now()->format('d M Y, H:i') }}</p>
     </div>
 </body>

@@ -32,6 +32,10 @@ class LoginController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
+    if ($user->role === 'admin_wahana') {
+        return redirect()->route('admin_wahana.dashboard');
+    }
+
     return redirect('/');
 }
 

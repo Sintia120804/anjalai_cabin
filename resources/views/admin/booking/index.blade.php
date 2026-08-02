@@ -131,6 +131,15 @@
                             {{-- TOTAL HARGA --}}
                             <td class="fw-bold text-primary">
                                 Rp {{ number_format($booking->total_order_price, 0, ',', '.') }}
+                                @if($booking->jenis_pembayaran == 'dp')
+                                    <div class="mt-1">
+                                        <span class="badge bg-warning text-dark" style="font-size: 10px;">Status: DP (Sisa: Rp {{ number_format($booking->sisa_pembayaran * $booking->total_rooms, 0, ',', '.') }})</span>
+                                    </div>
+                                @else
+                                    <div class="mt-1">
+                                        <span class="badge bg-success" style="font-size: 10px;">Status: Lunas</span>
+                                    </div>
+                                @endif
                             </td>
 
 
@@ -138,17 +147,29 @@
                             <td>
 
                                 @if($booking->status_booking == 'pending')
-
                                     <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
                                         Menunggu
                                     </span>
-
                                 @elseif($booking->status_booking == 'diterima')
-
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2">
-                                        Diterima
-                                    </span>
-
+                                    @php
+                                        $now = \Carbon\Carbon::now();
+                                        $checkin = \Carbon\Carbon::parse($booking->tanggal_checkin);
+                                        $checkout = \Carbon\Carbon::parse($booking->tanggal_checkout);
+                                    @endphp
+                                    
+                                    @if($now->greaterThanOrEqualTo($checkout))
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-2">
+                                            Selesai
+                                        </span>
+                                    @elseif($now->greaterThanOrEqualTo($checkin) && $now->lessThan($checkout))
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2">
+                                            Check-in
+                                        </span>
+                                    @else
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-2">
+                                            Booking
+                                        </span>
+                                    @endif
                                 @else
 
                                     <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2">

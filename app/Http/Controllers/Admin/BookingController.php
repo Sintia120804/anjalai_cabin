@@ -75,4 +75,25 @@ class BookingController extends Controller
 
         return back()->with('success', 'Seluruh pesanan dalam Order ID ' . $booking->order_id . ' berhasil diperbarui menjadi ' . ucfirst($request->status_booking));
     }
+
+    public function pelunasan(Booking $booking)
+    {
+        $allBookings = Booking::where('order_id', $booking->order_id)->get();
+        $totalSisa = $allBookings->sum('sisa_pembayaran');
+
+        // Update all bookings in this order
+        Booking::where('order_id', $booking->order_id)->update([
+            'jenis_pembayaran' => 'lunas',
+            'sisa_pembayaran' => 0
+        ]);
+
+        // Tambahkan sisa pembayaran ke total pendapatan
+        $pembayaran = \App\Models\Pembayaran::where('order_id', $booking->order_id)->first();
+        if ($pembayaran) {
+            $pembayaran->jumlah_bayar += $totalSisa;
+            $pembayaran->save();
+        }
+
+        return back()->with('success', 'Pesanan berhasil ditandai sebagai lunas dan total pendapatan telah disesuaikan.');
+    }
 }

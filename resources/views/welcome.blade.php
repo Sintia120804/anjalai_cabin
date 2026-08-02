@@ -1,9 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $bgImage = isset($galeriUmum) && $galeriUmum->first() ? asset('storage/' . $galeriUmum->first()->foto) : 'https://images.unsplash.com/photo-1587061949409-02df41d5e562?q=80&w=2070';
+    @endphp
     <!-- Hero Section -->
     <div class="position-relative overflow-hidden text-center text-white min-vh-100 d-flex align-items-center justify-content-center"
-        style="background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1542315191-76673dd49733?q=80&w=2070') center/cover fixed;">
+        style="background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.7)), url('{{ $bgImage }}') center/cover fixed;">
         <div class="col-md-8 p-lg-5 mx-auto my-5 z-1">
             <span class="badge bg-primary px-3 py-2 rounded-pill text-uppercase tracking-wider mb-4 shadow-sm"
                 style="letter-spacing: 2px;">
@@ -157,7 +160,7 @@
                                 @endif
                                 <div class="position-absolute top-0 start-0 m-3 z-2">
                                     <span class="badge bg-warning text-dark py-2 px-3 rounded-pill shadow-sm fw-bold">
-                                        Tersedia {{ $cabin->sisa_kamar }} Kamar
+                                        Hari ini tersedia {{ $cabin->sisa_kamar }} kamar
                                     </span>
                                 </div>
                                 <div class="position-absolute top-0 end-0 m-3 z-2">

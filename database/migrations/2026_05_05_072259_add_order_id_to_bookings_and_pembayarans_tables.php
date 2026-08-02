@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('order_id')->nullable()->after('id');
+            $table->string('order_id', 25)->nullable()->after('id');
         });
 
         Schema::table('pembayarans', function (Blueprint $table) {
-            $table->string('order_id')->nullable()->after('id');
+            $table->string('order_id', 25)->nullable()->after('id');
             $table->foreignId('booking_id')->nullable()->change();
         });
     }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('tanggal_checkout');
             $table->integer('jumlah_tamu');
             $table->decimal('total_harga', 10, 2);
-            $table->string('status_booking')->default('pending');
+            $table->string('status_booking', 25)->default('pending');
             $table->timestamps();
         });
     }

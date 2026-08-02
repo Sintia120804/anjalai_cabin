@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('cabin_id')->constrained('cabins')->onDelete('cascade');
-            $table->string('nama_pengunjung');
-            $table->string('no_hp');
+            $table->string('nama_pengunjung', 25);
+            $table->string('no_hp', 25);
             $table->date('tanggal_checkin');
             $table->date('tanggal_checkout');
             $table->decimal('total_harga', 10, 2);

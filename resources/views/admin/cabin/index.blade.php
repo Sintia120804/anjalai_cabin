@@ -17,8 +17,8 @@
                         <tr>
                             <th width="50">No</th>
                             <th>Foto Utama</th>
-                            <th>Kategori Cabin</th>
-                            <th>Rincian Harga</th>
+                            <th width="35%">Kategori Cabin</th>
+                            <th width="15%">Rincian Harga</th>
                             <th>Kapasitas</th>
                             <th>Status</th>
                             <th width="150">Aksi</th>
@@ -41,8 +41,8 @@
                                     <div class="mb-1">
                                         <span class="badge bg-warning text-dark border"><i class="bi bi-door-open-fill"></i> Total: {{ $cabin->units->count() }} Kamar/Unit</span>
                                     </div>
-                                    <small class="text-muted line-clamp-1"
-                                        style="-webkit-line-clamp: 1; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">
+                                    <small class="text-muted"
+                                        style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; white-space: normal;">
                                         {{ $cabin->deskripsi }}
                                     </small>
                                 </td>

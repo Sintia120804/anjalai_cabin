@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('booking_manuals', function (Blueprint $table) {
-            $table->string('status_booking')->default('booked')->after('total_harga');
+            $table->string('status_booking', 25)->default('booked')->after('total_harga');
         });
     }
 

@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers\AdminWahana;
+
+use App\Http\Controllers\Controller;
+use App\Models\Wahana;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class KelolaWahanaController extends Controller
+{
+    public function index()
+    {
+        $wahanas = Wahana::latest()->get();
+        return view('admin_wahana.kelola.index', compact('wahanas'));
+    }
+
+    public function create()
+    {
+        return view('admin_wahana.kelola.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'durasi'  => 'nullable|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'harga'   => 'required|numeric|min:0',
+            'foto'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5048'
+        ]);
+
+        $data = $request->only(['nama', 'durasi', 'deskripsi', 'harga']);
+
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('wahana', 'public');
+            $data['foto'] = $path;
+        }
+
+        Wahana::create($data);
+
+        return redirect()->route('admin_wahana.kelola.index')->with('success', 'Wahana berhasil ditambahkan.');
+    }
+
+    public function edit(Wahana $wahana)
+    {
+        return view('admin_wahana.kelola.edit', compact('wahana'));
+    }
+
+    public function update(Request $request, Wahana $wahana)
+    {
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'durasi'  => 'nullable|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'harga'   => 'required|numeric|min:0',
+            'foto'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5048'
+        ]);
+
+        $data = $request->only(['nama', 'durasi', 'deskripsi', 'harga']);
+
+        if ($request->hasFile('foto')) {
+            if ($wahana->foto) {
+                Storage::disk('public')->delete($wahana->foto);
+            }
+            $path = $request->file('foto')->store('wahana', 'public');
+            $data['foto'] = $path;
+        }
+
+        $wahana->update($data);
+
+        return redirect()->route('admin_wahana.kelola.index')->with('success', 'Wahana berhasil diperbarui.');
+    }
+
+    public function destroy(Wahana $wahana)
+    {
+        if ($wahana->foto) {
+            Storage::disk('public')->delete($wahana->foto);
+        }
+        $wahana->delete();
+
+        return redirect()->route('admin_wahana.kelola.index')->with('success', 'Wahana berhasil dihapus.');
+    }
+}

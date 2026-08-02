@@ -86,7 +86,18 @@
                             @if($booking->status_booking == 'pending')
                                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
                             @elseif($booking->status_booking == 'diterima')
-                                <span class="badge bg-success px-3 py-2 rounded-pill">Diterima</span>
+                                @php
+                                    $now = \Carbon\Carbon::now();
+                                    $checkin = \Carbon\Carbon::parse($booking->tanggal_checkin);
+                                    $checkout = \Carbon\Carbon::parse($booking->tanggal_checkout);
+                                @endphp
+                                @if($now->greaterThanOrEqualTo($checkout))
+                                    <span class="badge bg-secondary px-3 py-2 rounded-pill">Selesai</span>
+                                @elseif($now->greaterThanOrEqualTo($checkin) && $now->lessThan($checkout))
+                                    <span class="badge bg-success px-3 py-2 rounded-pill">Check-in</span>
+                                @else
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">Booking</span>
+                                @endif
                             @else
                                 <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
                             @endif
@@ -162,6 +173,20 @@
                                 <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
                             @else
                                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Pending</span>
+                            @endif
+
+                            @if($booking->jenis_pembayaran == 'dp' && $booking->sisa_pembayaran > 0)
+                                <div class="mt-3 alert alert-warning py-2 text-start small">
+                                    <strong>Status Pembayaran: DP 50%</strong><br>
+                                    Terdapat sisa pembayaran yang harus dilunasi pengunjung (dibayar saat Check-in).
+                                </div>
+                                <form action="{{ route('admin.booking.pelunasan', $booking->id) }}" method="POST" onsubmit="return confirm('Tandai pesanan ini sebagai Lunas (Pengunjung telah membayar sisa tagihan)?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm btn-outline-success w-100 rounded-pill fw-bold mt-2">
+                                        <i class="bi bi-check2-circle"></i> Tandai Sudah Lunas
+                                    </button>
+                                </form>
                             @endif
                         </div>
                         <div class="fw-bold small">

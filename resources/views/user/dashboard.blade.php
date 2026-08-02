@@ -101,6 +101,7 @@
                                         </div>
                                     </div>
                                 @endforeach
+
                             </div>
                             
                             <div class="card-footer bg-white p-4 border-top">
@@ -108,9 +109,21 @@
                                     <div>
                                         <p class="mb-1 text-muted small">Status Pembayaran Keseluruhan:</p>
                                         @if($pembayaran && $pembayaran->status_pembayaran === 'diterima')
-                                            <div class="text-success fw-bold d-flex align-items-center gap-1 fs-5">
-                                                <i class="bi bi-patch-check-fill"></i> LUNAS
-                                            </div>
+                                            @php 
+                                                $dpSisa = $orderBookings->sum('sisa_pembayaran'); // Wahana tidak punya dp terpisah
+                                            @endphp
+                                            @if(($firstBooking->jenis_pembayaran ?? 'lunas') == 'dp' && $dpSisa > 0)
+                                                <div class="text-warning fw-bold d-flex align-items-center gap-1 fs-5">
+                                                    <i class="bi bi-patch-check-fill"></i> DP 50% DIBAYAR
+                                                </div>
+                                                <div class="small text-muted mt-1">
+                                                    Sisa pelunasan Rp {{ number_format($dpSisa, 0, ',', '.') }} dibayar saat Check-in
+                                                </div>
+                                            @else
+                                                <div class="text-success fw-bold d-flex align-items-center gap-1 fs-5">
+                                                    <i class="bi bi-patch-check-fill"></i> LUNAS
+                                                </div>
+                                            @endif
                                             @if($firstBooking->status_booking === 'pending')
                                                 <div class="text-info fw-bold small mt-1">
                                                     <i class="bi bi-hourglass-split"></i> MENUNGGU RESPON ADMIN
@@ -129,17 +142,29 @@
                                                 <i class="bi bi-hourglass-split"></i> MENUNGGU PEMBAYARAN
                                             </div>
                                         @endif
-                                    </div>
-                                    
                                     <div class="text-md-end">
                                         <p class="mb-1 text-muted small">Total Tagihan:</p>
                                         <h4 class="fw-bold text-primary mb-3">Rp {{ number_format($pembayaran->jumlah_bayar ?? $grandTotal, 0, ',', '.') }}</h4>
-                                        
                                         <div class="d-flex flex-wrap justify-content-md-end gap-2">
                                             @if($pembayaran && $pembayaran->status_pembayaran === 'diterima')
                                                 <a href="{{ route('user.booking.pdf', $orderId) }}" target="_blank" class="btn btn-outline-success rounded-pill px-4 fw-bold shadow-sm">
                                                     <i class="bi bi-printer me-1"></i> Cetak Bukti PDF
                                                 </a>
+                                                @php
+                                                    $hasReviewed = \App\Models\Ulasan::where('booking_id', $firstBooking->id)->exists();
+                                                    $isPastCheckin = \Carbon\Carbon::now()->gte(\Carbon\Carbon::parse($firstBooking->tanggal_checkin));
+                                                    $canReschedule = \Carbon\Carbon::now()->addDays(14)->lte(\Carbon\Carbon::parse($firstBooking->tanggal_checkin));
+                                                @endphp
+                                                @if($canReschedule && $firstBooking->reschedule_count == 0)
+                                                    <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#rescheduleModal{{ $orderId }}">
+                                                        <i class="bi bi-calendar-range me-1"></i> Reschedule
+                                                    </button>
+                                                @endif
+                                                @if(!$hasReviewed && $isPastCheckin)
+                                                    <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#ulasanModal{{ $firstBooking->id }}">
+                                                        <i class="bi bi-star-fill me-1 text-dark"></i> Beri Ulasan
+                                                    </button>
+                                                @endif
                                             @endif
                                             
                                             @if(!$orderBookings->contains('status_booking', 'ditolak') && (!$pembayaran || !in_array($pembayaran->status_pembayaran, ['diterima', 'menunggu_konfirmasi'])))
@@ -325,6 +350,87 @@
                                 </div>
                             </div>
                         @endif
+                        
+                        @php
+                            $isPastCheckinModal = \Carbon\Carbon::now()->gte(\Carbon\Carbon::parse($firstBooking->tanggal_checkin));
+                        @endphp
+                        @if($pembayaran && $pembayaran->status_pembayaran === 'diterima' && !\App\Models\Ulasan::where('booking_id', $firstBooking->id)->exists() && $isPastCheckinModal)
+                            <div class="modal fade" id="ulasanModal{{ $firstBooking->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 rounded-4 shadow">
+                                        <div class="modal-header border-0 pb-0">
+                                            <h5 class="fw-bold">Berikan Ulasan Anda</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ route('user.ulasan.store') }}" method="POST">
+                                            @csrf
+                                            <div class="modal-body p-4">
+                                                <input type="hidden" name="booking_id" value="{{ $firstBooking->id }}">
+                                                <p class="small text-muted mb-4">Bagaimana pengalaman Anda menginap di <strong>{{ $firstBooking->cabin->name_cabin }}</strong>?</p>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Rating (1-5)</label>
+                                                    <select name="rating" class="form-select border-0 shadow-sm rounded-3 bg-light" required>
+                                                        <option value="5">⭐⭐⭐⭐⭐ Sangat Baik</option>
+                                                        <option value="4">⭐⭐⭐⭐ Baik</option>
+                                                        <option value="3">⭐⭐⭐ Cukup</option>
+                                                        <option value="2">⭐⭐ Kurang</option>
+                                                        <option value="1">⭐ Sangat Kurang</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Ulasan Singkat</label>
+                                                    <textarea name="komentar" rows="4" class="form-control border-0 shadow-sm rounded-3 bg-light" placeholder="Ceritakan pengalaman Anda di sini..." required></textarea>
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-warning w-100 rounded-pill py-2.5 fw-bold shadow-sm">Kirim Ulasan</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        @if($pembayaran && $pembayaran->status_pembayaran === 'diterima' && $canReschedule && $firstBooking->reschedule_count == 0)
+                            <div class="modal fade" id="rescheduleModal{{ $orderId }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 rounded-4 shadow">
+                                        <div class="modal-header border-0 pb-0">
+                                            <h5 class="fw-bold">Reschedule Pesanan</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ route('user.booking.reschedule', $orderId) }}" method="POST">
+                                            @csrf
+                                            <div class="modal-body p-4">
+                                                <div class="alert alert-info border-0 rounded-4 small mb-4">
+                                                    <i class="bi bi-info-circle-fill me-1"></i> <strong>Penting:</strong>
+                                                    <ul class="mb-0 mt-1 ps-3">
+                                                        <li>Anda hanya memiliki jatah Reschedule sebanyak <strong>1 kali</strong>.</li>
+                                                        <li>Durasi (jumlah malam) dan harga total pesanan akan disamakan dengan pesanan awal.</li>
+                                                    </ul>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Pilih Tanggal Check-In Baru</label>
+                                                    <input type="date" name="new_checkin" class="form-control form-control-lg bg-white border shadow-sm" required min="{{ \Carbon\Carbon::now()->addDays(1)->format('Y-m-d') }}">
+                                                </div>
+                                                <p class="small text-muted mb-4">Tanggal Check-Out akan disesuaikan secara otomatis berdasarkan durasi inap awal Anda ({{ \Carbon\Carbon::parse($firstBooking->tanggal_checkin)->diffInHours(\Carbon\Carbon::parse($firstBooking->tanggal_checkout)) / 24 }} malam).</p>
+                                                
+                                                <div class="card bg-light border-0 mb-4">
+                                                    <div class="card-body p-3 d-flex justify-content-between align-items-center rounded-3">
+                                                        <span class="fw-bold text-muted small">Total Harga (Tetap):</span>
+                                                        <span class="fw-bold text-primary fs-5">Rp {{ number_format($grandTotal, 0, ',', '.') }}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-primary w-100 rounded-pill py-2.5 fw-bold shadow-sm">Simpan Jadwal Baru</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                     @empty
                     <div class="p-5 bg-white border border-light rounded-4 shadow-sm text-center">
@@ -403,6 +509,8 @@
                                     });
                                 },
                                 onClose: function() {
+                                    payBtn.disabled = false;
+                                    payBtn.innerHTML = originalText;
                                     Swal.fire({
                                         icon: 'info',
                                         title: 'Dibatalkan',
@@ -412,6 +520,8 @@
                                 }
                             });
                         } else {
+                            payBtn.disabled = false;
+                            payBtn.innerHTML = originalText;
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Oops...',
@@ -420,15 +530,13 @@
                             });
                         }
                     })
-                    .catch(error => {
+                    .catch(err => {
                         payBtn.disabled = false;
                         payBtn.innerHTML = originalText;
-                        console.error('Error:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Kesalahan Sistem',
-                            text: 'Terjadi kesalahan saat memproses pembayaran.',
-                            confirmButtonColor: '#2563eb'
+                            text: err.message || 'Terjadi kesalahan saat memproses pembayaran.'
                         });
                     });
             }

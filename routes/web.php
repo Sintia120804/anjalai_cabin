@@ -9,6 +9,11 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PublicCabinController;
 use App\Http\Controllers\UserBookingController;
+use App\Http\Controllers\AdminWahana\DashboardController as AdminWahanaDashboard;
+use App\Http\Controllers\AdminWahana\KelolaWahanaController;
+use App\Http\Controllers\AdminWahana\PendapatanController as AdminWahanaPendapatan;
+use App\Http\Controllers\AdminWahana\LaporanController as AdminWahanaLaporan;
+use App\Http\Controllers\AdminWahana\BookingManualWahanaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +37,8 @@ Route::prefix('admin')
 
           Route::get('/dashboard', [DashboardController::class, 'index'])
                ->name('admin.dashboard');
+          Route::get('/laporan', [\App\Http\Controllers\Admin\ReportController::class, 'index'])
+               ->name('admin.dashboard.report');
 
           Route::resource('/cabin', CabinController::class)
                ->names('admin.cabin');
@@ -44,6 +51,7 @@ Route::prefix('admin')
           Route::resource('/booking', BookingController::class)
                ->names('admin.booking');
           Route::patch('/booking/{booking}/status', [BookingController::class, 'updateStatus'])->name('admin.booking.updateStatus');
+          Route::patch('/booking/{booking}/pelunasan', [BookingController::class, 'pelunasan'])->name('admin.booking.pelunasan');
 
           Route::resource('/booking-manual', BookingManualController::class)
                ->names('admin.booking_manual');
@@ -56,6 +64,37 @@ Route::prefix('admin')
           Route::resource('/galeri-umum', GaleriUmumController::class)
                ->names('admin.galeri_umum');
 
+          Route::get('/customer', [\App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('admin.customer.index');
+          Route::delete('/customer/{customer}', [\App\Http\Controllers\Admin\CustomerController::class, 'destroy'])->name('admin.customer.destroy');
+
+          Route::get('/ulasan', [\App\Http\Controllers\Admin\UlasanController::class, 'index'])->name('admin.ulasan.index');
+          Route::delete('/ulasan/{ulasan}', [\App\Http\Controllers\Admin\UlasanController::class, 'destroy'])->name('admin.ulasan.destroy');
+
+     });
+
+// ===== Admin Wahana Routes =====
+Route::prefix('admin-wahana')
+     ->middleware(['auth', 'admin_wahana'])
+     ->group(function () {
+
+          Route::get('/dashboard', [AdminWahanaDashboard::class, 'index'])
+               ->name('admin_wahana.dashboard');
+
+          // Kelola Wahana
+          Route::resource('/kelola', KelolaWahanaController::class)
+               ->names('admin_wahana.kelola')
+               ->parameters(['kelola' => 'wahana']);
+
+
+
+          // Laporan Wahana
+          Route::get('/laporan', [AdminWahanaLaporan::class, 'index'])
+               ->name('admin_wahana.laporan.index');
+
+          // Booking Manual Wahana
+          Route::resource('/booking-manual', BookingManualWahanaController::class)
+               ->names('admin_wahana.booking_manual')
+               ->parameters(['booking-manual' => 'booking_manual']);
      });
 
 // User/Pengunjung Routes
@@ -71,6 +110,8 @@ Route::middleware(['auth'])->group(function () {
 
      Route::delete('/booking/{booking}', [UserBookingController::class, 'destroy'])->name('user.booking.destroy');
      Route::get('/booking/{orderId}/pdf', [UserBookingController::class, 'exportPdf'])->name('user.booking.pdf');
+     Route::post('/booking/{orderId}/reschedule', [UserBookingController::class, 'reschedule'])->name('user.booking.reschedule');
+     Route::post('/ulasan', [UserBookingController::class, 'storeUlasan'])->name('user.ulasan.store');
 
      // Manual Payment Upload
      Route::post('/payment/upload/{booking}', [PaymentController::class, 'uploadProof'])->name('payment.upload');

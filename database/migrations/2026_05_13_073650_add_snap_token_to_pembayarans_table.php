@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pembayarans', function (Blueprint $table) {
-            $table->string('snap_token')->nullable()->after('status_pembayaran');
+            $table->string('snap_token', 255)->nullable()->after('status_pembayaran');
         });
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('galeri_umums', function (Blueprint $table) {
             $table->id();
             $table->string('foto');
-            $table->string('caption')->nullable();
+            $table->string('caption', 25)->nullable();
             $table->timestamps();
         });
     }

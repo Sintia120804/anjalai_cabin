@@ -1,0 +1,60 @@
+@extends('admin_wahana.layouts.app')
+
+@section('title', 'Tambah Wahana')
+
+@section('content')
+<div class="mb-4">
+    <a href="{{ route('admin_wahana.kelola.index') }}" class="text-decoration-none text-success">
+        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Wahana
+    </a>
+    <h5 class="fw-bold mt-2">Tambah Wahana & Atraksi Baru</h5>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                @if($errors->any())
+                    <div class="alert alert-danger rounded-3">
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $e) <li>{{ $e }}</li> @endforeach
+                        </ul>
+                    </div>
+                @endif
+                <form action="{{ route('admin_wahana.kelola.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nama Wahana <span class="text-danger">*</span></label>
+                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Jetski Basic" value="{{ old('nama') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Durasi <span class="text-muted small">(Contoh: 15 Menit)</span></label>
+                        <input type="text" name="durasi" class="form-control" placeholder="Contoh: 15 Menit / 1 Jam" value="{{ old('durasi') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Harga Tiket <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="harga" class="form-control" placeholder="0" value="{{ old('harga') }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Deskripsi</label>
+                        <textarea name="deskripsi" class="form-control" rows="4" placeholder="Jelaskan keseruan wahana ini...">{{ old('deskripsi') }}</textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Foto Wahana</label>
+                        <input type="file" name="foto" class="form-control" accept="image/*">
+                        <div class="form-text">Maksimal 5MB. Format: JPG, PNG, WEBP.</div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-save me-1"></i> Simpan Wahana
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

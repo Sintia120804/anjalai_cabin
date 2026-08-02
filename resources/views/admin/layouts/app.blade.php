@@ -200,15 +200,27 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.wahana.index') }}"
-                    class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.wahana.*') ? 'bg-primary shadow-sm' : '' }}">
-                    <i class="bi bi-flag fs-5"></i> Kelola Wahana
+                <a href="{{ route('admin.customer.index') }}"
+                    class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.customer.*') ? 'bg-primary shadow-sm' : '' }}">
+                    <i class="bi bi-people fs-5"></i> Kelola Customer
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.ulasan.index') }}"
+                    class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.ulasan.*') ? 'bg-primary shadow-sm' : '' }}">
+                    <i class="bi bi-star fs-5"></i> Kelola Ulasan
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ route('admin.galeri_umum.index') }}"
                     class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3 {{ request()->routeIs('admin.galeri_umum.*') ? 'bg-primary shadow-sm' : '' }}">
                     <i class="bi bi-images fs-5"></i> Galeri Umum
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.dashboard.report') }}"
+                    class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <i class="bi bi-file-earmark-pdf fs-5"></i> Laporan
                 </a>
             </li>
         </ul>
