@@ -118,6 +118,27 @@
 
                         <hr class="text-muted border-secondary opacity-25">
 
+                        {{-- SECTION: TAMBAH KAMAR/UNIT --}}
+                        <div class="mb-4 mt-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label fw-medium mb-0">
+                                    <i class="bi bi-door-open me-1 text-warning"></i>
+                                    Kamar / Unit <span class="text-muted small fw-normal">(Opsional, bisa ditambah nanti)</span>
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-warning fw-medium" id="btn-tambah-kamar">
+                                    <i class="bi bi-plus-circle me-1"></i> Tambah Kamar
+                                </button>
+                            </div>
+                            <div id="kamar-list">
+                                {{-- Baris kamar akan ditambahkan di sini secara dinamis --}}
+                            </div>
+                            <div id="kamar-empty-hint" class="text-muted small text-center py-2 border rounded bg-light">
+                                <i class="bi bi-info-circle me-1"></i> Klik "Tambah Kamar" untuk menambahkan unit kamar.
+                            </div>
+                        </div>
+
+                        <hr class="text-muted border-secondary opacity-25">
+
                         <div class="mb-4 mt-3">
                             <label class="form-label fw-medium">Upload Galeri Foto <span
                                     class="text-danger">*</span></label>
@@ -171,6 +192,7 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Choices.js untuk fasilitas
             var element = document.querySelector('.choices-fasilitas');
             if (element) {
                 new Choices(element, {
@@ -181,6 +203,48 @@
                     itemSelectText: 'Klik untuk memilih'
                 });
             }
+
+            // === Logika Tambah Kamar Dinamis ===
+            const btnTambah   = document.getElementById('btn-tambah-kamar');
+            const kamarList   = document.getElementById('kamar-list');
+            const emptyHint   = document.getElementById('kamar-empty-hint');
+            let kamarIndex    = 0;
+
+            function updateHint() {
+                emptyHint.style.display = kamarList.children.length === 0 ? 'block' : 'none';
+            }
+
+            btnTambah.addEventListener('click', function () {
+                const i = kamarIndex++;
+                const row = document.createElement('div');
+                row.className = 'row g-2 mb-2 align-items-center kamar-row';
+                row.innerHTML = `
+                    <div class="col-md-7">
+                        <input type="text" name="units[${i}][unit_name]"
+                               class="form-control form-control-sm"
+                               placeholder="Nama kamar, cth: Kamar 01" required>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="units[${i}][status]" class="form-select form-select-sm">
+                            <option value="available">Tersedia (Available)</option>
+                            <option value="maintenance">Perbaikan (Maintenance)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle btn-hapus-kamar" title="Hapus">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                `;
+                row.querySelector('.btn-hapus-kamar').addEventListener('click', function () {
+                    row.remove();
+                    updateHint();
+                });
+                kamarList.appendChild(row);
+                updateHint();
+            });
+
+            updateHint();
         });
     </script>
 @endpush

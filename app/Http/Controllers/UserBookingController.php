@@ -133,10 +133,11 @@ class UserBookingController extends Controller
             $currentDate->addDay();
         }
 
-        // Proses Fasilitas Tambahan
+        // Proses Fasilitas Tambahan (Dinonaktifkan)
         $totalHargaFasilitas = 0;
         $fasilitasTambahanJson = null;
 
+        /*
         if ($request->has('fasilitas') && is_array($request->fasilitas)) {
             $fasilitasData = [];
             $fasilitasList = \App\Models\FasilitasTambahan::whereIn('id', $request->fasilitas)->get();
@@ -150,6 +151,7 @@ class UserBookingController extends Controller
             }
             $fasilitasTambahanJson = json_encode($fasilitasData);
         }
+        */
 
         $totalHargaAkhir = $totalHargaBase + $totalHargaFasilitas;
 

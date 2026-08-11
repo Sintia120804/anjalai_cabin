@@ -167,12 +167,12 @@
                                         <td width="50">
                                             <div class="bg-primary bg-opacity-10 text-primary small p-2 rounded-circle text-center"
                                                 style="width: 35px; height: 35px; line-height: 20px;">
-                                                {{ substr($b->user->name, 0, 1) }}
+                                                {{ substr($b->user?->name ?? 'U', 0, 1) }}
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="fw-bold">{{ $b->user->name }}</div>
-                                            <div class="text-muted small">{{ $b->cabin->name_cabin }}</div>
+                                            <div class="fw-bold">{{ $b->user?->name ?? 'User Dihapus' }}</div>
+                                            <div class="text-muted small">{{ $b->cabin?->name_cabin ?? 'Kamar Dihapus' }}</div>
                                         </td>
                                         <td class="text-end fw-bold">Rp {{ number_format($b->total_harga, 0, ',', '.') }}</td>
                                     </tr>
@@ -210,7 +210,7 @@
                                         </td>
                                         <td>
                                             <div class="fw-bold">{{ $m->nama_pengunjung }}</div>
-                                            <div class="text-muted small">{{ $m->cabin->name_cabin }}</div>
+                                            <div class="text-muted small">{{ $m->cabin?->name_cabin ?? 'Kamar Dihapus' }}</div>
                                         </td>
                                         <td class="text-end fw-bold">Rp {{ number_format($m->total_harga, 0, ',', '.') }}</td>
                                     </tr>

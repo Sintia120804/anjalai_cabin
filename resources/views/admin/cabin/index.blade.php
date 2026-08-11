@@ -39,7 +39,8 @@
                                 <td>
                                     <div class="fw-bold fs-6 text-primary">{{ strtoupper($cabin->name_cabin) }}</div>
                                     <div class="mb-1">
-                                        <span class="badge bg-warning text-dark border"><i class="bi bi-door-open-fill"></i> Total: {{ $cabin->units->count() }} Kamar/Unit</span>
+                                        <span class="badge bg-warning text-dark border"><i class="bi bi-door-open-fill"></i>
+                                            Total: {{ $cabin->units->count() }} Kamar/Unit</span>
                                     </div>
                                     <small class="text-muted"
                                         style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; white-space: normal;">
@@ -73,10 +74,10 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.cabin.units.index', $cabin->id) }}"
-                                            class="btn btn-sm btn-warning text-dark rounded-circle" title="Kelola Unit">
-                                            <i class="bi bi-door-open"></i>
-                                        </a>
+                                        <!-- <a href="{{ route('admin.cabin.units.index', $cabin->id) }}"
+                                                    class="btn btn-sm btn-warning text-dark rounded-circle" title="Kelola Unit">
+                                                    <i class="bi bi-door-open"></i>
+                                                </a> -->
                                         <a href="{{ route('admin.cabin.edit', $cabin->id) }}"
                                             class="btn btn-sm btn-info text-white rounded-circle" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
@@ -85,8 +86,7 @@
                                             onsubmit="return confirm('Yakin ingin menghapus cabin ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"
-                                                title="Hapus">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle" title="Hapus">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

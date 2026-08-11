@@ -196,7 +196,7 @@
                 <th>Kabin</th>
                 <th>Check-In & Check-Out</th>
                 <th>Tamu</th>
-                <th>Harga & Fasilitas</th>
+                <!-- <th>Harga & Fasilitas</th> -->
                 <th style="text-align: right;">Subtotal</th>
             </tr>
         </thead>
@@ -214,31 +214,32 @@
                         Out: {{ \Carbon\Carbon::parse($booking->tanggal_checkout)->format('d M Y H:i') }}
                     </td>
                     <td style="text-align: center;">{{ $booking->jumlah_tamu }} Org</td>
-                    <td>
-                        @php $fasilitas = json_decode($booking->fasilitas_tambahan, true); @endphp
-                        @if($fasilitas && count($fasilitas) > 0)
-                            <div style="font-size: 10px; margin-bottom: 3px;">+ Fasilitas:</div>
-                            <ul style="margin: 0; padding-left: 15px; font-size: 9px;">
-                                @foreach($fasilitas as $fas)
-                                    <li>{{ $fas['nama'] }} (Rp {{ number_format($fas['harga'], 0, ',', '.') }})</li>
-                                @endforeach
-                            </ul>
-                        @else
-                            -
-                        @endif
-                    </td>
+
+                    <!-- <td>
+                            @php $fasilitas = json_decode($booking->fasilitas_tambahan, true); @endphp
+                            @if($fasilitas && count($fasilitas) > 0)
+                                <div style="font-size: 10px; margin-bottom: 3px;">+ Fasilitas:</div>
+                                <ul style="margin: 0; padding-left: 15px; font-size: 9px;">
+                                    @foreach($fasilitas as $fas)
+                                        <li>{{ $fas['nama'] }} (Rp {{ number_format($fas['harga'], 0, ',', '.') }})</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                -
+                            @endif
+                        </td> -->
                     <td style="text-align: right;">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
             <tr class="total-row">
-                <td colspan="5" style="text-align: right;">TOTAL BAYAR (SEKARANG)</td>
+                <td colspan="4" style="text-align: right;">TOTAL BAYAR (SEKARANG)</td>
                 <td style="text-align: right; color: #2563eb;">Rp
                     {{ number_format($pembayaran->jumlah_bayar ?? $grandTotal, 0, ',', '.') }}
                 </td>
             </tr>
             @if($firstBooking->jenis_pembayaran == 'dp' && $orderBookings->sum('sisa_pembayaran') > 0)
                 <tr class="total-row" style="background-color: #fffbeb;">
-                    <td colspan="5" style="text-align: right; color: #b45309;">SISA PELUNASAN (SAAT CHECK-IN)</td>
+                    <td colspan="4" style="text-align: right; color: #b45309;">SISA PELUNASAN (SAAT CHECK-IN)</td>
                     <td style="text-align: right; color: #b45309;">Rp
                         {{ number_format($orderBookings->sum('sisa_pembayaran'), 0, ',', '.') }}
                     </td>

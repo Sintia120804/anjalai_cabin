@@ -34,7 +34,8 @@
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-body);
             color: #1e293b;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
+            /* Prevent horizontal scroll */
         }
 
         .navbar {
@@ -128,7 +129,7 @@
             border-radius: 50px;
             text-align: center;
             font-size: 30px;
-            box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
+            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -140,7 +141,7 @@
         .whatsapp-float:hover {
             transform: scale(1.1);
             color: #FFF;
-            box-shadow: 2px 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 2px 5px 20px rgba(0, 0, 0, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -196,7 +197,9 @@
                             <a class="nav-link position-relative" href="{{ route('cart.index') }}">
                                 <i class="bi bi-cart3 fs-5"></i>
                                 @if(session('cart') && count(session('cart')) > 0)
-                                    <span class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                    <span
+                                        class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-danger"
+                                        style="font-size: 0.6rem;">
                                         {{ count(session('cart')) }}
                                     </span>
                                 @endif
@@ -333,11 +336,36 @@
             });
         </script>
     @endif
-    <a href="https://wa.me/6285161248112?text=Halo%20Admin%20Anjalai,%20saya%20ingin%20bertanya%20tentang%20reservasi%20cabin..." 
-       class="whatsapp-float" target="_blank" title="Chat via WhatsApp">
+    <a href="https://wa.me/6285161248112?text=Halo%20Admin%20Anjalai,%20saya%20ingin%20bertanya%20tentang%20reservasi%20cabin..."
+        class="whatsapp-float" target="_blank" title="Chat via WhatsApp">
         <i class="bi bi-whatsapp"></i>
     </a>
     @stack('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    let href = this.getAttribute('href');
+                    if (href && href !== '#' && (href.includes('#') || href === '{{ url('/') }}')) {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            let currentHash = window.location.hash;
+            if (currentHash) {
+                navLinks.forEach(l => l.classList.remove('active'));
+                let activeLink = document.querySelector(`.navbar-nav .nav-link[href*="${currentHash}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+        });
+    </script>
+
 </body>
 
 </html>

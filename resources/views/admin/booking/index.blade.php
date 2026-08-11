@@ -98,18 +98,18 @@
                             {{-- PEMESAN --}}
                             <td>
                                 <div class="fw-bold">
-                                    {{ $booking->user->name }}
+                                    {{ $booking->user?->name ?? 'User Dihapus' }}
                                 </div>
 
                                 <small class="text-muted">
-                                    {{ $booking->user->email }}
+                                    {{ $booking->user?->email ?? '-' }}
                                 </small>
                             </td>
 
                             {{-- CABIN --}}
                             <td>
                                 <div class="fw-bold">
-                                    {{ $booking->cabin->name_cabin }}
+                                    {{ $booking->cabin?->name_cabin ?? 'Kamar Dihapus' }}
                                 </div>
 
                                 <span class="badge bg-info bg-opacity-10 text-info">
